@@ -5,7 +5,10 @@
 ![GitHub issues](https://img.shields.io/github/issues/sincyn/clib)
 ![GitHub license](https://img.shields.io/github/license/sincyn/clib)
 
-clib is a comprehensive suite of high-performance, cross-compiler compatible C libraries targeting the C17 standard. This project aims to provide robust, efficient, and easy-to-use implementations for common programming tasks across different platforms.
+clib is
+a comprehensive suite of high-performance, cross-compiler compatible C libraries targeting the C17 standard. This
+project aims to provide robust, efficient, and easy-to-use implementations for common programming tasks across different
+platforms.
 
 ## Table of Contents
 
@@ -31,7 +34,7 @@ clib is a comprehensive suite of high-performance, cross-compiler compatible C l
 - **Thread-Safe**: Designed for multi-threaded applications
 - **Unified Interface**: All libraries combined into a single, easy-to-use interface
 - **Extensive Testing**: Comprehensive test suite ensures reliability
-- **Well-Documented**: Detailed documentation and examples for each library
+- **(Soon to-be) Well-Documented**: Detailed documentation and examples for each library
 
 ## Libraries
 
@@ -114,7 +117,8 @@ target_link_libraries(your_target PRIVATE clib_all)
 
 ## Examples
 
-Check the `examples/` directory for sample code demonstrating the usage of clib. Here's a quick example using the socket and log components:
+Check the `examples/` directory for sample code demonstrating the usage of clib. Here's a quick example using the socket
+and log components:
 
 ```c
 #include <clib.h>
@@ -141,17 +145,14 @@ int main() {
 
 ## Documentation
 
-Detailed documentation for clib can be found in the `docs/` directory. You can also generate Doxygen documentation by running:
-
-```bash
-doxygen Doxyfile
-```
-
-The generated documentation will be available in `docs/html/`.
+Detailed documentation is a work in progress. C Documentation generator library with treesitter is planned to be used
+for generating documentation. There is no ETA for this feature. Please see the examples and include/ directory for more
+information on each library.
 
 ## Contributing
 
-We welcome contributions to clib! Please see our [Contributing Guide](CONTRIBUTING.md) for details on how to submit pull requests, report issues, and suggest improvements.
+We welcome contributions to clib! Please see our [Contributing Guide](CONTRIBUTING.md) for details on how to submit pull
+requests, report issues, and suggest improvements.
 
 ## Testing
 
@@ -164,11 +165,16 @@ ctest
 
 ## Performance
 
-We are committed to maintaining high performance across all our libraries. You can find benchmarks and performance comparisons in the `benchmarks/` directory.
+Performance is a key focus of clib. We aim to provide high-performance implementations that are efficient and scalable.
+We regularly benchmark the library to ensure it meets our performance goals. If you encounter any performance issues,
+please let us know by opening an issue.
+
+###### **(WIP)** - benchmarks/ directory containing the benchmarking code is planned to be added in the future.
 
 ## Roadmap
 
-See the [open issues](https://github.com/sincyn/clib/issues) for a list of proposed features and known issues. Our long-term goals include:
+See the [open issues](https://github.com/sincyn/clib/issues) for a list of proposed features and known issues. Our
+long-term goals include:
 
 - Expanding the socket library to support more protocols
 - Adding a file I/O library with asynchronous capabilities
@@ -186,4 +192,5 @@ clib is licensed under the MIT License. See the [LICENSE](LICENSE) file for deta
 
 ---
 
-If you find clib useful, please consider giving it a star on GitHub! Your support helps us continue improving and maintaining this project.
+If you find clib useful, please consider giving it a star on GitHub! Your support helps us continue improving and
+maintaining this project.
