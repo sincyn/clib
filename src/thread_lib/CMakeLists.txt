@@ -27,6 +27,8 @@ if (NOT WIN32)
     target_link_libraries(clib_thread PRIVATE Threads::Threads)
 endif ()
 
+target_link_libraries(clib_thread PRIVATE clib_log clib_memory)
+
 install(TARGETS clib_thread
         EXPORT clib_all_targets
         ARCHIVE DESTINATION lib

@@ -23,11 +23,10 @@ if (BUILD_SHARED_LIBS)
 endif ()
 
 if (WIN32)
-    if (WIN32)
-        target_link_libraries(clib_socket PRIVATE ws2_32)
-    endif ()
-
+    target_link_libraries(clib_socket PRIVATE ws2_32)
 endif ()
+
+target_link_libraries(clib_socket PRIVATE clib_log clib_memory)
 
 install(TARGETS clib_socket
         EXPORT clib_all_targets
