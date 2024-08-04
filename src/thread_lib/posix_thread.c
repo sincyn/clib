@@ -1,7 +1,8 @@
 /**
  * Created by jraynor on 8/3/2024.
  */
-#ifndef _WIN32
+#include "clib/defines.h"
+#if defined(CL_PLATFORM_APPLE) || defined(CL_PLATFORM_LINUX)
 
 #include <time.h>
 #include <unistd.h>
@@ -94,4 +95,5 @@ bool cl_cond_signal_platform(cl_cond_t *cond) { return pthread_cond_signal(&cond
 
 bool cl_cond_broadcast_platform(cl_cond_t *cond) { return pthread_cond_broadcast(&cond->cond) == 0; }
 
-#endif // !_WIN32
+#endif
+

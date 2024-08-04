@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../include/clib/thread_lib.h"
+#include "clib/thread_lib.h"
 
 #ifdef _WIN32
 #include <process.h>
