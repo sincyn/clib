@@ -78,6 +78,13 @@ install(EXPORT clib_all_targets
 if (BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
+
+    # Ensure all test executables link against clib_all and specify link order
+    file(GLOB TEST_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/tests/*.c")
+    foreach(TEST_SOURCE ${TEST_SOURCES})
+        get_filename_component(TEST_NAME ${TEST_SOURCE} NAME_WE)
+        target_link_libraries(${TEST_NAME} PRIVATE ${CLIB_LIBRARIES})
+    endforeach()
 endif ()
 
 # Add examples
