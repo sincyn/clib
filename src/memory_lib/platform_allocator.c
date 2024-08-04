@@ -13,11 +13,9 @@
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+#endif
 #elif defined(CL_PLATFORM_APPLE) || defined(CL_PLATFORM_LINUX)
 #include <stdlib.h>
-#endif
-
-
 #endif
 
 static void *platform_alloc(u64 size, void *user_data)

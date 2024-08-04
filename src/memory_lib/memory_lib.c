@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "allocator_internal.h"
+
 cl_allocator_t *cl_allocator_create(const cl_allocator_config_t *config)
 {
     if (config == NULL)
