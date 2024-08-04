@@ -3,6 +3,7 @@
 
 #include "defines.h"
 
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -86,18 +87,8 @@ void cl_log(cl_log_level_t level, const char *file, int line, const char *fmt, .
 void cl_logv(cl_log_level_t level, const char *file, int line, const char *fmt, va_list args);
 
 
-inline void cl_log_init_default(cl_log_level_t min_level)
-{
-    cl_log_config_t config = {.include_timestamp = true,
-                              .include_level = true,
-                              .include_file_line = true,
-                              .use_short_time_format = true};
-    cl_log_init(&config);
+void cl_log_init_default(cl_log_level_t min_level);
 
-    cl_log_target_config_t console_config = {
-        .type = CL_LOG_TARGET_CONSOLE, .min_level = min_level, .config.console = {.use_colors = true}};
-    cl_log_add_target(&console_config);
-}
 
 // Convenience macros for logging
 #define CL_LOG_TRACE(...) cl_log(CL_LOG_TRACE, __FILE__, __LINE__, __VA_ARGS__)

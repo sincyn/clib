@@ -2,7 +2,7 @@
  * Created by jraynor on 8/3/2024.
  */
 #pragma once
-
+#include <clib/defines.h>
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -64,22 +64,23 @@ bool cl_socket_listen(const cl_socket_t *socket, int backlog);
 cl_socket_t *cl_socket_accept(const cl_socket_t *socket, cl_socket_address_t *client_address);
 
 // Send data
-int cl_socket_send(const cl_socket_t *socket, const void *buffer, size_t length);
+int cl_socket_send(const cl_socket_t *socket, const void *buffer, u64 length);
 
 // Receive data
-int cl_socket_recv(const cl_socket_t *socket, void *buffer, size_t length);
+int cl_socket_recv(const cl_socket_t *socket, void *buffer, u64 length);
 
 // Send data to a specific address (for UDP)
-int cl_socket_sendto(const cl_socket_t *socket, const void *buffer, size_t length, const cl_socket_address_t *address);
+int cl_socket_sendto(const cl_socket_t *socket, const void *buffer, u64 length, const cl_socket_address_t *address);
 
 // Receive data and get the sender's address (for UDP)
-int cl_socket_recvfrom(const cl_socket_t *socket, void *buffer, size_t length, cl_socket_address_t *address);
+int cl_socket_recvfrom(const cl_socket_t *socket, void *buffer, u64 length, cl_socket_address_t *address);
 
 // Set socket option
-bool cl_socket_set_option(const cl_socket_t *socket, int level, int option_name, const void *option_value, size_t option_len);
+bool cl_socket_set_option(const cl_socket_t *socket, int level, int option_name, const void *option_value,
+                          u64 option_len);
 
 // Get socket option
-bool cl_socket_get_option(const cl_socket_t *socket, int level, int option_name, void *option_value, size_t *option_len);
+bool cl_socket_get_option(const cl_socket_t *socket, int level, int option_name, void *option_value, u64 *option_len);
 
 // Set socket to blocking or non-blocking mode
 bool cl_socket_set_blocking(const cl_socket_t *socket, bool blocking);
@@ -88,8 +89,7 @@ bool cl_socket_set_blocking(const cl_socket_t *socket, bool blocking);
 bool cl_socket_addr_from_string(const char *ip_address, uint16_t port, cl_socket_address_t *out_addr);
 
 // Convert cl_socket_address_t to string IP address
-bool cl_socket_addr_to_string(const cl_socket_address_t *addr, char *ip_string, size_t ip_string_size,
-                              uint16_t *out_port);
+bool cl_socket_addr_to_string(const cl_socket_address_t *addr, char *ip_string, u64 ip_string_size, uint16_t *out_port);
 
 #ifdef __cplusplus
 }

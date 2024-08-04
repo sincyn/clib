@@ -3,21 +3,24 @@
  */
 #include "clib/memory_lib.h"
 
-
 #include "allocator_internal.h"
+#include "clib/defines.h"
 
 #include <stdbool.h>
+#include <stdlib.h>
 
-#ifdef _WIN32
+#ifdef CL_PLATFORM_WINDOWS
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
-#endif
 #include <Windows.h>
+#elif defined(CL_PLATFORM_APPLE) || defined(CL_PLATFORM_LINUX)
+#include <stdlib.h>
+#endif
 
 
 #endif
 
-static void *platform_alloc(size_t size, void *user_data)
+static void *platform_alloc(u64 size, void *user_data)
 {
 #ifdef _WIN32
     static HANDLE g_process_heap = NULL;
@@ -32,14 +35,14 @@ static void *platform_alloc(size_t size, void *user_data)
 #endif
 }
 
-static void *platform_realloc(void *ptr, size_t new_size, void *user_data)
+static void *platform_realloc(void *ptr, u64 new_size, void *user_data)
 {
 #ifdef _WIN32
-  static HANDLE g_process_heap = NULL;
-  if (g_process_heap == NULL)
-  {
-    g_process_heap = GetProcessHeap();
-  }
+    static HANDLE g_process_heap = NULL;
+    if (g_process_heap == NULL)
+    {
+        g_process_heap = GetProcessHeap();
+    }
     return HeapReAlloc(g_process_heap, 0, ptr, new_size);
 #else
     (void)user_data; // Unused
@@ -50,11 +53,11 @@ static void *platform_realloc(void *ptr, size_t new_size, void *user_data)
 static void platform_free(void *ptr, void *user_data)
 {
 #ifdef _WIN32
-  static HANDLE g_process_heap = NULL;
-  if (g_process_heap == NULL)
-  {
-    g_process_heap = GetProcessHeap();
-  }
+    static HANDLE g_process_heap = NULL;
+    if (g_process_heap == NULL)
+    {
+        g_process_heap = GetProcessHeap();
+    }
     HeapFree(g_process_heap, 0, ptr);
 #else
     (void)user_data; // Unused

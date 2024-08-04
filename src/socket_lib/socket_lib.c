@@ -112,7 +112,7 @@ cl_socket_t *cl_socket_accept(const cl_socket_t *socket, cl_socket_address_t *cl
     return client_socket;
 }
 
-int cl_socket_send(const cl_socket_t *socket, const void *buffer, const size_t length)
+int cl_socket_send(const cl_socket_t *socket, const void *buffer, const u64 length)
 {
     if (socket == NULL || buffer == NULL)
     {
@@ -122,7 +122,7 @@ int cl_socket_send(const cl_socket_t *socket, const void *buffer, const size_t l
     return cl_socket_send_platform(socket->handle, buffer, length, 0);
 }
 
-int cl_socket_recv(const cl_socket_t *socket, void *buffer, const size_t length)
+int cl_socket_recv(const cl_socket_t *socket, void *buffer, const u64 length)
 {
     if (socket == NULL || buffer == NULL)
     {
@@ -132,7 +132,7 @@ int cl_socket_recv(const cl_socket_t *socket, void *buffer, const size_t length)
     return cl_socket_recv_platform(socket->handle, buffer, length, 0);
 }
 
-int cl_socket_sendto(const cl_socket_t *socket, const void *buffer, const size_t length,
+int cl_socket_sendto(const cl_socket_t *socket, const void *buffer, const u64 length,
                      const cl_socket_address_t *address)
 {
     if (socket == NULL || buffer == NULL || address == NULL)
@@ -147,7 +147,7 @@ int cl_socket_sendto(const cl_socket_t *socket, const void *buffer, const size_t
     return cl_socket_sendto_platform(socket->handle, buffer, length, 0, (struct sockaddr *)&native_addr, addr_len);
 }
 
-int cl_socket_recvfrom(const cl_socket_t *socket, void *buffer, const size_t length, cl_socket_address_t *address)
+int cl_socket_recvfrom(const cl_socket_t *socket, void *buffer, const u64 length, cl_socket_address_t *address)
 {
     if (socket == NULL || buffer == NULL)
     {
@@ -169,7 +169,7 @@ int cl_socket_recvfrom(const cl_socket_t *socket, void *buffer, const size_t len
 }
 
 bool cl_socket_set_option(const cl_socket_t *socket, const int level, const int option_name, const void *option_value,
-                          const size_t option_len)
+                          const u64 option_len)
 {
     if (socket == NULL || option_value == NULL)
     {
@@ -180,7 +180,7 @@ bool cl_socket_set_option(const cl_socket_t *socket, const int level, const int 
 }
 
 bool cl_socket_get_option(const cl_socket_t *socket, const int level, const int option_name, void *option_value,
-                          size_t *option_len)
+                          u64 *option_len)
 {
     if (socket == NULL || option_value == NULL || option_len == NULL)
     {
@@ -190,7 +190,7 @@ bool cl_socket_get_option(const cl_socket_t *socket, const int level, const int 
     socklen_t native_option_len = *option_len;
     const int result =
         cl_socket_getsockopt_platform(socket->handle, level, option_name, option_value, &native_option_len);
-    *option_len = (size_t)native_option_len;
+    *option_len = (u64)native_option_len;
     return result == 0;
 }
 
@@ -232,7 +232,7 @@ bool cl_socket_addr_from_string(const char *ip_address, const uint16_t port, cl_
     return false;
 }
 
-bool cl_socket_addr_to_string(const cl_socket_address_t *addr, char *ip_string, const size_t ip_string_size,
+bool cl_socket_addr_to_string(const cl_socket_address_t *addr, char *ip_string, const u64 ip_string_size,
                               uint16_t *out_port)
 {
     if (addr == NULL || ip_string == NULL || ip_string_size == 0 || out_port == NULL)

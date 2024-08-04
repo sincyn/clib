@@ -5,7 +5,7 @@
 
 #include <time.h>
 #include <unistd.h>
-#include "private/thread_internal.h"
+#include "thread_internal.h"
 
 bool cl_thread_create_platform(cl_thread_t *thread)
 {

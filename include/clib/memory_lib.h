@@ -12,8 +12,8 @@ typedef struct cl_allocator cl_allocator_t;
 #define CL_MEMORY_ALIGN(size, alignment) (((size) + ((alignment)-1)) & ~((alignment)-1))
 
 // Allocator function types
-typedef void *(*cl_alloc_func)(size_t size, void *user_data);
-typedef void *(*cl_realloc_func)(void *ptr, size_t new_size, void *user_data);
+typedef void *(*cl_alloc_func)(u64 size, void *user_data);
+typedef void *(*cl_realloc_func)(void *ptr, u64 new_size, void *user_data);
 typedef void (*cl_free_func)(void *ptr, void *user_data);
 
 // Allocator structure
@@ -47,27 +47,27 @@ typedef struct cl_allocator_config
     {
         struct
         {
-            size_t block_size;
-            size_t block_count;
+            u64 block_size;
+            u64 block_count;
         } pool;
         struct
         {
-            size_t size;
+            u64 size;
             void *start;
             void *current;
             void *end;
         } linear;
         struct
         {
-            size_t size;
+            u64 size;
             void *start;
             void *current;
             void *end;
         } stack;
         struct
         {
-            size_t block_size;
-            size_t block_count;
+            u64 block_size;
+            u64 block_count;
             void *free_list;
         } free_list;
         struct
@@ -97,17 +97,17 @@ cl_allocator_t *cl_allocator_create(const cl_allocator_config_t *config);
 void cl_allocator_destroy(cl_allocator_t *allocator);
 
 // General memory functions
-void *cl_mem_alloc(const cl_allocator_t *allocator, size_t size);
-void *cl_mem_realloc(const cl_allocator_t *allocator, void *ptr, size_t new_size);
+void *cl_mem_alloc(const cl_allocator_t *allocator, u64 size);
+void *cl_mem_realloc(const cl_allocator_t *allocator, void *ptr, u64 new_size);
 void cl_mem_free(const cl_allocator_t *allocator, void *ptr);
-void *cl_mem_aligned_alloc(cl_allocator_t *allocator, size_t alignment, size_t size);
+void *cl_mem_aligned_alloc(cl_allocator_t *allocator, u64 alignment, u64 size);
 void cl_mem_aligned_free(const cl_allocator_t *allocator, void *ptr);
 
 // Utility functions
-void cl_mem_set(void *ptr, int value, size_t num);
-void cl_mem_copy(void *dest, const void *src, size_t num);
-void cl_mem_move(void *dest, const void *src, size_t num);
-int cl_mem_compare(const void *ptr1, const void *ptr2, size_t num);
+void cl_mem_set(void *ptr, int value, u64 num);
+void cl_mem_copy(void *dest, const void *src, u64 num);
+void cl_mem_move(void *dest, const void *src, u64 num);
+int cl_mem_compare(const void *ptr1, const void *ptr2, u64 num);
 
 #ifdef __cplusplus
 }

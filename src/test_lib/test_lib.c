@@ -61,7 +61,7 @@
 #define PROGRESS_BAR_WIDTH 20
 
 static cl_test_suite_t *g_suites[MAX_SUITES];
-static size_t g_suite_count = 0;
+static u64 g_suite_count = 0;
 static cl_test_context_t g_context = {0};
 
 
@@ -76,7 +76,7 @@ void cl_test_init(void)
 
 void cl_test_cleanup(void)
 {
-    for (size_t i = 0; i < g_suite_count; i++)
+    for (u64 i = 0; i < g_suite_count; i++)
     {
         g_suites[i] = NULL;
     }
@@ -97,12 +97,12 @@ void cl_test_register_suite(const cl_test_suite_t *suite)
 
 static void print_header(const char *title)
 {
-    size_t title_length = strlen(title);
-    size_t box_width = title_length + 4; // 2 space padding on each side
+    u64 title_length = strlen(title);
+    u64 box_width = title_length + 4; // 2 space padding on each side
 
     // Top border
     printf("\n%s%s", ANSI_COLOR_HEADER, BOX_TOP_LEFT);
-    for (size_t i = 0; i < box_width; i++)
+    for (u64 i = 0; i < box_width; i++)
     {
         printf("%s", BOX_HORIZONTAL);
     }
@@ -113,7 +113,7 @@ static void print_header(const char *title)
 
     // Bottom border
     printf("%s", BOX_BOTTOM_LEFT);
-    for (size_t i = 0; i < box_width; i++)
+    for (u64 i = 0; i < box_width; i++)
     {
         printf("%s", BOX_HORIZONTAL);
     }
@@ -122,7 +122,7 @@ static void print_header(const char *title)
 
 
 // Update the print_progress_bar function for better visual
-static void print_progress_bar(size_t passed, size_t total)
+static void print_progress_bar(u64 passed, u64 total)
 {
     const int width = 20;
     int filled_width = (int)((double)passed / total * width);
@@ -143,13 +143,13 @@ static void run_test(const char *suite_name, const char *test_name, cl_test_func
 {
     g_context.current_suite = suite_name;
     g_context.current_test = test_name;
-    size_t initial_assert_count = g_context.assert_count;
-    size_t initial_pass_count = g_context.pass_count;
+    u64 initial_assert_count = g_context.assert_count;
+    u64 initial_pass_count = g_context.pass_count;
 
     test_func();
 
-    size_t test_assert_count = g_context.assert_count - initial_assert_count;
-    size_t test_pass_count = g_context.pass_count - initial_pass_count;
+    u64 test_assert_count = g_context.assert_count - initial_assert_count;
+    u64 test_pass_count = g_context.pass_count - initial_pass_count;
 
     printf("%-*.*s ", TEST_NAME_WIDTH, TEST_NAME_WIDTH, test_name);
 
@@ -167,11 +167,11 @@ static void run_test(const char *suite_name, const char *test_name, cl_test_func
 
     if (test_assert_count != test_pass_count)
     {
-        for (size_t i = initial_pass_count; i < g_context.pass_count; i++)
+        for (u64 i = initial_pass_count; i < g_context.pass_count; i++)
         {
             printf("  " ANSI_COLOR_GREEN "✓ %s" ANSI_COLOR_RESET "\n", g_context.pass_results[i].message);
         }
-        for (size_t i = initial_assert_count; i < g_context.fail_count; i++)
+        for (u64 i = initial_assert_count; i < g_context.fail_count; i++)
         {
             printf("  " ANSI_COLOR_RED "✗ %s" ANSI_COLOR_RESET "\n", g_context.fail_results[i].message);
             printf("    %s:%d\n", g_context.fail_results[i].file, g_context.fail_results[i].line);
@@ -190,7 +190,7 @@ static void run_test(const char *suite_name, const char *test_name, cl_test_func
 void cl_test_run_suite(const cl_test_suite_t *suite)
 {
     print_header(suite->name);
-    for (size_t i = 0; i < suite->test_count; i++)
+    for (u64 i = 0; i < suite->test_count; i++)
     {
         run_test(suite->name, suite->tests[i].name, suite->tests[i].func);
     }
@@ -215,7 +215,7 @@ void print_row_separator(int col1_width, int col2_width)
 
 void cl_test_run_all(void)
 {
-    for (size_t i = 0; i < g_suite_count; i++)
+    for (u64 i = 0; i < g_suite_count; i++)
     {
         cl_test_run_suite(g_suites[i]);
     }

@@ -169,10 +169,10 @@ void cl_log_set_target_level(cl_log_target_t *target, cl_log_level_t level)
 static const char *level_colors[] = {ANSI_DIM ANSI_CYAN, ANSI_BLUE, ANSI_GREEN,
                                      ANSI_YELLOW,        ANSI_RED,  ANSI_BOLD ANSI_RED};
 
-static void format_log_message(char *buffer, size_t buffer_size, cl_log_level_t level, const char *file, int line,
+static void format_log_message(char *buffer, u64 buffer_size, cl_log_level_t level, const char *file, int line,
                                const char *fmt, va_list args)
 {
-    size_t written = 0;
+    u64 written = 0;
     char timestamp[20] = {0};
     char file_line_str[50] = {0};
     char message[MAX_LOG_MESSAGE_LENGTH];
@@ -221,23 +221,23 @@ static void format_log_message(char *buffer, size_t buffer_size, cl_log_level_t 
 
     // Wrap long lines
     // Wrap long lines
-    size_t prefix_length = strlen(timestamp) + strlen(file_line_str) + 5; // +5 for spaces and LOG_SUFFIX
-    size_t first_line_max_length = MAX_LINE_LENGTH - prefix_length - strlen(LOG_PREFIX) - strlen(LOG_SUFFIX);
-    size_t subsequent_line_max_length = MAX_LINE_LENGTH - strlen(LOG_PREFIX) - strlen(LOG_SUFFIX);
-    size_t msg_length = strlen(message);
-    size_t current_pos = 0;
+    u64 prefix_length = strlen(timestamp) + strlen(file_line_str) + 5; // +5 for spaces and LOG_SUFFIX
+    u64 first_line_max_length = MAX_LINE_LENGTH - prefix_length - strlen(LOG_PREFIX) - strlen(LOG_SUFFIX);
+    u64 subsequent_line_max_length = MAX_LINE_LENGTH - strlen(LOG_PREFIX) - strlen(LOG_SUFFIX);
+    u64 msg_length = strlen(message);
+    u64 current_pos = 0;
     bool is_first_line = true;
 
     while (current_pos < msg_length)
     {
-        size_t remaining = msg_length - current_pos;
-        size_t max_length = is_first_line ? first_line_max_length : subsequent_line_max_length;
-        size_t line_length = (remaining > max_length) ? max_length : remaining;
+        u64 remaining = msg_length - current_pos;
+        u64 max_length = is_first_line ? first_line_max_length : subsequent_line_max_length;
+        u64 line_length = (remaining > max_length) ? max_length : remaining;
 
         // Find the last space in the line, if needed
         if (line_length < remaining && line_length == max_length)
         {
-            size_t last_space = line_length;
+            u64 last_space = line_length;
             while (last_space > 0 && message[current_pos + last_space] != ' ')
             {
                 last_space--;
@@ -263,11 +263,11 @@ static void format_log_message(char *buffer, size_t buffer_size, cl_log_level_t 
         strncat(wrapped_message, message + current_pos, line_length);
 
         // Add padding spaces and LOG_SUFFIX
-        size_t padding = max_length - line_length;
+        u64 padding = max_length - line_length;
         if (is_first_line)
         {
 
-            for (size_t i = 0; i < padding; i++)
+            for (u64 i = 0; i < padding; i++)
             {
                 strcat(wrapped_message, " ");
             }
@@ -275,7 +275,7 @@ static void format_log_message(char *buffer, size_t buffer_size, cl_log_level_t 
         else
         {
             padding -= 9;
-            for (size_t i = 0; i < padding; i++)
+            for (u64 i = 0; i < padding; i++)
             {
                 strcat(wrapped_message, " ");
             }
@@ -342,6 +342,17 @@ void cl_logv(cl_log_level_t level, const char *file, int line, const char *fmt, 
             log_context.targets[i].write(level, message);
         }
     }
+}
+
+void cl_log_init_default(cl_log_level_t min_level)
+{
+    cl_log_config_t config = {
+        .include_timestamp = true, .include_level = true, .include_file_line = true, .use_short_time_format = true};
+    cl_log_init(&config);
+
+    cl_log_target_config_t console_config = {
+        .type = CL_LOG_TARGET_CONSOLE, .min_level = min_level, .config.console = {.use_colors = true}};
+    cl_log_add_target(&console_config);
 }
 
 void cl_log(cl_log_level_t level, const char *file, int line, const char *fmt, ...)

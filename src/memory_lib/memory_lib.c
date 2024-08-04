@@ -49,14 +49,14 @@ void cl_allocator_destroy(cl_allocator_t *allocator)
     free(allocator);
 }
 
-void *cl_mem_alloc(const cl_allocator_t *allocator, const size_t size)
+void *cl_mem_alloc(const cl_allocator_t *allocator, const u64 size)
 {
     if (allocator == NULL || allocator->alloc == NULL)
         return malloc(size);
     return allocator->alloc(size, allocator->user_data);
 }
 
-void *cl_mem_realloc(const cl_allocator_t *allocator, void *ptr, const size_t new_size)
+void *cl_mem_realloc(const cl_allocator_t *allocator, void *ptr, const u64 new_size)
 {
     if (allocator == NULL || allocator->realloc == NULL)
         return realloc(ptr, new_size);
@@ -69,7 +69,7 @@ void cl_mem_free(const cl_allocator_t *allocator, void *ptr)
         return free(ptr);
     allocator->free(ptr, allocator->user_data);
 }
-void *cl_mem_aligned_alloc(cl_allocator_t *allocator, size_t alignment, size_t size)
+void *cl_mem_aligned_alloc(cl_allocator_t *allocator, u64 alignment, u64 size)
 {
     // Aligns the memory allocation to the specified alignment
     // The alignment must be a power of 2
@@ -85,7 +85,7 @@ void *cl_mem_aligned_alloc(cl_allocator_t *allocator, size_t alignment, size_t s
         return NULL;
 
     // Allocate memory with extra space for alignment
-    size_t total_size = size + alignment;
+    u64 total_size = size + alignment;
     void *ptr = allocator->alloc(total_size, allocator->user_data);
     if (ptr == NULL)
         return NULL;
@@ -125,10 +125,10 @@ void cl_mem_aligned_free(const cl_allocator_t *allocator, void *ptr)
 }
 
 
-void cl_mem_set(void *ptr, const int value, const size_t num) { memset(ptr, value, num); }
+void cl_mem_set(void *ptr, const int value, const u64 num) { memset(ptr, value, num); }
 
-void cl_mem_copy(void *dest, const void *src, const size_t num) { memcpy(dest, src, num); }
+void cl_mem_copy(void *dest, const void *src, const u64 num) { memcpy(dest, src, num); }
 
-void cl_mem_move(void *dest, const void *src, const size_t num) { memmove(dest, src, num); }
+void cl_mem_move(void *dest, const void *src, const u64 num) { memmove(dest, src, num); }
 
-int cl_mem_compare(const void *ptr1, const void *ptr2, const size_t num) { return memcmp(ptr1, ptr2, num); }
+int cl_mem_compare(const void *ptr1, const void *ptr2, const u64 num) { return memcmp(ptr1, ptr2, num); }

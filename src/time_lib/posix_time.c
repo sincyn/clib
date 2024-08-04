@@ -1,5 +1,5 @@
 #include "clib/defines.h"
-#ifdef CL_PLATFORM_LINUX || CL_PLATFORM_MACOS
+#ifdef CL_PLATFORM_APPLE || CL_PLATFORM_LINUX
 /**
  * Created by jraynor on 8/4/2024.
  */

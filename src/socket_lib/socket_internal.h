@@ -40,10 +40,10 @@ int cl_socket_bind_platform(int handle, const struct sockaddr *addr, socklen_t a
 int cl_socket_connect_platform(int handle, const struct sockaddr *addr, socklen_t addrlen);
 int cl_socket_listen_platform(int handle, int backlog);
 int cl_socket_accept_platform(int handle, struct sockaddr *addr, socklen_t *addrlen);
-int cl_socket_send_platform(int handle, const void *buf, size_t len, int flags);
-int cl_socket_recv_platform(int handle, void *buf, size_t len, int flags);
-int cl_socket_sendto_platform(int handle, const void *buf, size_t len, int flags, const struct sockaddr *dest_addr, socklen_t addrlen);
-int cl_socket_recvfrom_platform(int handle, void *buf, size_t len, int flags, struct sockaddr *src_addr, socklen_t *addrlen);
+int cl_socket_send_platform(int handle, const void *buf, u64 len, int flags);
+int cl_socket_recv_platform(int handle, void *buf, u64 len, int flags);
+int cl_socket_sendto_platform(int handle, const void *buf, u64 len, int flags, const struct sockaddr *dest_addr, socklen_t addrlen);
+int cl_socket_recvfrom_platform(int handle, void *buf, u64 len, int flags, struct sockaddr *src_addr, socklen_t *addrlen);
 int cl_socket_setsockopt_platform(int handle, int level, int optname, const void *optval, socklen_t optlen);
 int cl_socket_getsockopt_platform(int handle, int level, int optname, void *optval, socklen_t *optlen);
 int cl_socket_set_blocking_platform(int handle, bool blocking);

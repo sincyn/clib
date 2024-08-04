@@ -15,12 +15,12 @@ int main()
     // Allocate 100 bytes
     void *ptr = cl_mem_alloc(allocator, 100);
     // Set all bytes to incrementing values looping from 0-99
-    for (size_t i = 0; i < 100; ++i)
+    for (u64 i = 0; i < 100; ++i)
     {
         ((uint8_t *)ptr)[i] = (uint8_t)i;
     }
     // Log the values as hex
-    for (size_t i = 0; i < 100; ++i)
+    for (u64 i = 0; i < 100; ++i)
     {
         printf("0x%02X ", ((uint8_t *)ptr)[i]);
         if ((i + 1) % 10 == 0)

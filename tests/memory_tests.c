@@ -43,7 +43,7 @@ CL_TEST(test_mem_set)
     int test_value = 0xAA;
     cl_mem_set(ptr, test_value, TEST_ALLOC_SIZE);
 
-    for (size_t i = 0; i < TEST_ALLOC_SIZE; i++)
+    for (u64 i = 0; i < TEST_ALLOC_SIZE; i++)
     {
         CL_ASSERT_EQUAL(((unsigned char *)ptr)[i], (unsigned char)test_value);
     }
@@ -58,7 +58,7 @@ CL_TEST(test_mem_copy)
     CL_ASSERT_NOT_NULL(src);
     CL_ASSERT_NOT_NULL(dest);
 
-    for (size_t i = 0; i < TEST_ALLOC_SIZE; i++)
+    for (u64 i = 0; i < TEST_ALLOC_SIZE; i++)
     {
         ((unsigned char *)src)[i] = (unsigned char)i;
     }
@@ -76,14 +76,14 @@ CL_TEST(test_mem_move)
     unsigned char *buffer = (unsigned char *)cl_mem_alloc(test_allocator, TEST_ALLOC_SIZE * 2);
     CL_ASSERT_NOT_NULL(buffer);
 
-    for (size_t i = 0; i < TEST_ALLOC_SIZE; i++)
+    for (u64 i = 0; i < TEST_ALLOC_SIZE; i++)
     {
         buffer[i] = (unsigned char)i;
     }
 
     cl_mem_move(buffer + TEST_ALLOC_SIZE / 2, buffer, TEST_ALLOC_SIZE);
 
-    for (size_t i = 0; i < TEST_ALLOC_SIZE / 2; i++)
+    for (u64 i = 0; i < TEST_ALLOC_SIZE / 2; i++)
     {
         CL_ASSERT_EQUAL(buffer[TEST_ALLOC_SIZE / 2 + i], (unsigned char)i);
     }

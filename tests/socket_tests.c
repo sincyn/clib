@@ -22,7 +22,7 @@ static char client_received[BUFFER_SIZE];
 static bool server_done = false;
 static bool client_done = false;
 
-void *server_func(const void *arg)
+void *server_func( void *arg)
 {
     (void)arg;
 
@@ -95,7 +95,7 @@ void *server_func(const void *arg)
     return NULL;
 }
 
-void *client_func(const void *arg)
+void *client_func( void *arg)
 {
     (void)arg;
 
@@ -185,7 +185,6 @@ CL_TEST(test_socket_full_communication)
     client_done = false;
     memset(server_received, 0, BUFFER_SIZE);
     memset(client_received, 0, BUFFER_SIZE);
-
     server_thread = cl_thread_create(server_func, NULL, 0);
     client_thread = cl_thread_create(client_func, NULL, 0);
 

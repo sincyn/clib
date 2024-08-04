@@ -39,20 +39,20 @@ int cl_socket_accept_platform(int handle, struct sockaddr *addr, socklen_t *addr
     return accept(handle, addr, addrlen);
 }
 
-int cl_socket_send_platform(int handle, const void *buf, size_t len, int flags)
+int cl_socket_send_platform(int handle, const void *buf, u64 len, int flags)
 {
     return (int)send(handle, buf, len, flags);
 }
 
-int cl_socket_recv_platform(int handle, void *buf, size_t len, int flags) { return (int)recv(handle, buf, len, flags); }
+int cl_socket_recv_platform(int handle, void *buf, u64 len, int flags) { return (int)recv(handle, buf, len, flags); }
 
-int cl_socket_sendto_platform(int handle, const void *buf, size_t len, int flags, const struct sockaddr *dest_addr,
+int cl_socket_sendto_platform(int handle, const void *buf, u64 len, int flags, const struct sockaddr *dest_addr,
                               socklen_t addrlen)
 {
     return (int)sendto(handle, buf, len, flags, dest_addr, addrlen);
 }
 
-int cl_socket_recvfrom_platform(int handle, void *buf, size_t len, int flags, struct sockaddr *src_addr,
+int cl_socket_recvfrom_platform(int handle, void *buf, u64 len, int flags, struct sockaddr *src_addr,
                                 socklen_t *addrlen)
 {
     return (int)recvfrom(handle, buf, len, flags, src_addr, addrlen);

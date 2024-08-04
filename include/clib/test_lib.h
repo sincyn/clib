@@ -33,7 +33,7 @@ typedef struct
 {
     const char *name;
     cl_test_case_t *tests;
-    size_t test_count;
+    u64 test_count;
 } cl_test_suite_t;
 
 
@@ -50,17 +50,17 @@ typedef struct
 {
     const char *current_suite;
     const char *current_test;
-    size_t assert_count;
-    size_t assert_count_total;
-    size_t pass_count;
-    size_t pass_count_total;
+    u64 assert_count;
+    u64 assert_count_total;
+    u64 pass_count;
+    u64 pass_count_total;
 
     cl_test_assert_result_t pass_results[1024];
-    size_t fail_count;
-    size_t fail_count_total;
+    u64 fail_count;
+    u64 fail_count_total;
     cl_test_assert_result_t fail_results[1024];
-    size_t skip_count;
-    size_t skip_count_total;
+    u64 skip_count;
+    u64 skip_count_total;
     cl_test_assert_result_t skip_results[1024];
 
 } cl_test_context_t;
