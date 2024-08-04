@@ -6,7 +6,7 @@
 #include "clib/thread_lib.h"
 #include "clib/time_lib.h"
 
-#define TEST_PORT 12343 // Changed port number
+#define TEST_PORT 21420 // Changed port number
 #define TEST_MESSAGE "Hello, Socket!"
 #define BUFFER_SIZE 1024
 #define TIMEOUT_MS 5000 // 5 seconds timeout

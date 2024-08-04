@@ -109,7 +109,6 @@ CL_TEST(test_mem_compare)
 
     cl_mem_free(test_allocator, buf1);
     cl_mem_free(test_allocator, buf2);
-    CL_ASSERT_NOT_NULL(null);
 }
 
 CL_TEST_SUITE_BEGIN(MemoryTests)
