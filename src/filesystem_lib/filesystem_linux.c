@@ -7,16 +7,24 @@
 #if defined(CL_PLATFORM_LINUX)
 #define _XOPEN_SOURCE 500
 #define _GNU_SOURCE
+#include <dirent.h>
+#include <errno.h>
+#include <fcntl.h>
 #include <ftw.h>
-#include <unistd.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <errno.h>
 #include <string.h>
-#include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <unistd.h>
+#include "clib/log_lib.h"
 #include "filesystem_internal.h"
+
+#ifndef PATH_MAX
+#define PATH_MAX 4096
+#endif
+
 #ifndef FTW_DEPTH
 #define FTW_DEPTH 4
 #endif
@@ -27,7 +35,7 @@
 
 char *cl_fs_platform_normalize_path(cl_fs_t *fs, const char *path)
 {
-    char *normalized = cl_mem_alloc(fs->allocator, PATH_MAX);
+     char *normalized = cl_mem_alloc(fs->allocator, PATH_MAX);
     if (normalized == NULL)
     {
         cl_fs_set_last_error(fs, "Failed to allocate memory for normalized path");
@@ -387,7 +395,6 @@ cl_fs_dir_iterator_t *cl_fs_platform_open_directory(cl_fs_t *fs, const char *pat
     iterator->fs = fs;
     iterator->handle = dir;
 
-    // Store the full path of the directory being opened
     iterator->path = cl_mem_alloc(fs->allocator, strlen(path) + 1);
     if (iterator->path == NULL)
     {
@@ -417,7 +424,6 @@ bool cl_fs_platform_read_directory(cl_fs_dir_iterator_t *iterator, cl_fs_dir_ent
     entry->name = dir_entry->d_name;
     entry->is_directory = (dir_entry->d_type == DT_DIR);
 
-    // Get additional file information
     char full_path[PATH_MAX];
     snprintf(full_path, sizeof(full_path), "%s/%s", iterator->path, entry->name);
 
@@ -437,7 +443,6 @@ bool cl_fs_platform_read_directory(cl_fs_dir_iterator_t *iterator, cl_fs_dir_ent
     return true;
 }
 
-// ... (previous code remains the same)
 
 void cl_fs_platform_close_directory(cl_fs_dir_iterator_t *iterator)
 {
