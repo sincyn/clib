@@ -220,6 +220,7 @@ bool cl_fs_platform_create_directory(cl_fs_t *fs, const char *path)
     return true;
 }
 
+
 static int remove_callback(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
 {
     int status = remove(fpath);
@@ -230,10 +231,9 @@ static int remove_callback(const char *fpath, const struct stat *sb, int typefla
     return status;
 }
 
-
 bool cl_fs_platform_remove_directory(cl_fs_t *fs, const char *path)
 {
-    if (nftw(path, remove_callback, 64, FTW_DEPTH) == -1)
+    if (nftw(path, remove_callback, 64, FTW_DEPTH | FTW_PHYS) == -1)
     {
         int err = errno;
         cl_fs_set_last_error(fs, strerror(err));
@@ -323,6 +323,7 @@ bool cl_fs_platform_copy(cl_fs_t *fs, const char *src_path, const char *dest_pat
 
 bool cl_fs_platform_file_exists(cl_fs_t *fs, const char *path)
 {
+    (void)fs; // Unused parameter
     struct stat st;
     return (stat(path, &st) == 0 && S_ISREG(st.st_mode));
 }
