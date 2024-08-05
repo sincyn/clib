@@ -256,7 +256,7 @@ static int remove_callback(const char *fpath, const struct stat *sb, int typefla
     int status = remove(fpath);
     if (status != 0)
     {
-        CL_LOG_ERROR("Failed to remove %s: %s", fpath, strerror(errno));
+        cl_log_error("Failed to remove %s: %s", fpath, strerror(errno));
     }
     return status;
 }
@@ -267,7 +267,7 @@ bool cl_fs_platform_remove_directory(cl_fs_t *fs, const char *path)
     {
         int err = errno;
         cl_fs_set_last_error(fs, strerror(err));
-        CL_LOG_ERROR("Failed to remove directory %s: %s (errno: %d)", path, strerror(err), err);
+        cl_log_error("Failed to remove directory %s: %s (errno: %d)", path, strerror(err), err);
         return false;
     }
 
