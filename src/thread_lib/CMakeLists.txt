@@ -24,10 +24,11 @@ endif ()
 
 if (NOT WIN32)
     find_package(Threads REQUIRED)
-    target_link_libraries(PRIVATE Threads::Threads)
+    target_link_libraries(clib_thread PRIVATE Threads::Threads clib_log clib_memory)
+else ()
+    target_link_libraries(clib_thread PRIVATE clib_log clib_memory)
 endif ()
 
-target_link_libraries(clib_thread PRIVATE clib_log clib_memory)
 
 install(TARGETS clib_thread
         EXPORT clib_all_targets
