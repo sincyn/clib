@@ -33,9 +33,22 @@
 #define FTW_PHYS 1
 #endif
 
+
+bool cl_fs_platform_init(cl_fs_t *fs)
+{
+    // Apple-specific initialization (if needed)
+    return true;
+}
+
+void cl_fs_platform_cleanup(cl_fs_t *fs)
+{
+    // Apple-specific cleanup (if needed)
+}
+
+
 char *cl_fs_platform_normalize_path(cl_fs_t *fs, const char *path)
 {
-     char *normalized = cl_mem_alloc(fs->allocator, PATH_MAX);
+    char *normalized = cl_mem_alloc(fs->allocator, PATH_MAX);
     if (normalized == NULL)
     {
         cl_fs_set_last_error(fs, "Failed to allocate memory for normalized path");
@@ -236,9 +249,9 @@ bool cl_fs_platform_create_directory(cl_fs_t *fs, const char *path)
 
 static int remove_callback(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
 {
-    (void)sb;      // Unused parameter
+    (void)sb; // Unused parameter
     (void)typeflag; // Unused parameter
-    (void)ftwbuf;   // Unused parameter
+    (void)ftwbuf; // Unused parameter
 
     int status = remove(fpath);
     if (status != 0)
