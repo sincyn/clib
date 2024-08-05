@@ -24,7 +24,7 @@ endif ()
 
 if (NOT WIN32)
     find_package(Threads REQUIRED)
-    target_link_libraries(clib_thread PRIVATE Threads::Threads)
+    target_link_libraries(PRIVATE Threads::Threads)
 endif ()
 
 target_link_libraries(clib_thread PRIVATE clib_log clib_memory)

@@ -196,23 +196,11 @@ void cl_test_run_suite(const cl_test_suite_t *suite)
     }
     printf("\n");
 }
-void print_row_separator(int col1_width, int col2_width)
-{
-    printf("%s%s", ANSI_COLOR_HEADER, BOX_VERTICAL_RIGHT);
-    for (int i = 0; i < col1_width; i++)
-        printf("%s", BOX_HORIZONTAL);
-    printf("%s", BOX_VERTICAL);
-    for (int i = 0; i < col2_width; i++)
-        printf("%s", BOX_HORIZONTAL);
-    printf("%s%s\n", BOX_VERTICAL_LEFT, ANSI_COLOR_RESET);
-}
-
 // Function to print a table row
 #define PRINT_ROW(label, count, color)                                                                                 \
     printf("%s%s %-*s %s%*s%s%s%zu%s/%zu %s%s\n", ANSI_COLOR_HEADER, BOX_VERTICAL, col1_width, label,                  \
            ANSI_COLOR_HEADER BOX_VERTICAL, col2_width - 7, "", color ANSI_STYLE_BOLD ANSI_STYLE_UNDERLINE, count,      \
            ANSI_STYLE_RESET color, g_context.assert_count_total, ANSI_COLOR_HEADER BOX_VERTICAL, ANSI_COLOR_RESET)
-
 void cl_test_run_all(void)
 {
     for (u64 i = 0; i < g_suite_count; i++)
@@ -220,13 +208,20 @@ void cl_test_run_all(void)
         cl_test_run_suite(g_suites[i]);
     }
 
+    // Calculate the width of the result strings
+    int passed_width = snprintf(NULL, 0, "%zu / %zu", g_context.pass_count_total, g_context.assert_count_total);
+    int failed_width = snprintf(NULL, 0, "%zu / %zu", g_context.fail_count_total, g_context.assert_count_total);
+    int skipped_width = snprintf(NULL, 0, "%zu / %zu", g_context.skip_count_total, g_context.assert_count_total);
+
+    // Find the maximum width
+    int max_result_width = passed_width > failed_width ? passed_width : failed_width;
+    max_result_width = max_result_width > skipped_width ? max_result_width : skipped_width;
+
     // Table dimensions
-    const int table_width = 35;
     const int col1_width = 20;
-    const int col2_width = table_width - col1_width - 3; // -3 for separators
+    const int col2_width = max_result_width + 3; // +2 for spacing
+    const int table_width = col1_width + col2_width + 5; // +5 for separators and spacing
 
-
-    // Print header
     // Print header
     printf("\n%s%s %sTest Summary%s %s%s\n", ANSI_COLOR_HEADER, BOX_TOP_LEFT,
            ANSI_STYLE_BOLD ANSI_STYLE_UNDERLINE ANSI_COLOR_MAGENTA, ANSI_STYLE_RESET ANSI_COLOR_HEADER, BOX_TOP_RIGHT,
@@ -243,32 +238,41 @@ void cl_test_run_all(void)
         printf("%s", BOX_HORIZONTAL);
     printf("%s%s\n", BOX_TOP_RIGHT, ANSI_COLOR_RESET);
 
+    // Print rows
+    // Only show if any tests were passed
+    if (g_context.pass_count_total > 0)
+        printf("%s%s %-*s %s \x1b[1m\x1b[4m%-*zu\x1b[0m / \x1b[1m\x1b[3m%-*zu %s%s\n", ANSI_COLOR_HEADER,
+               BOX_VERTICAL ANSI_COLOR_RESET ANSI_STYLE_REVERSE, col1_width, "Passed",
+               ANSI_STYLE_RESET ANSI_COLOR_HEADER BOX_VERTICAL ANSI_COLOR_GREEN, max_result_width / 2 - 1,
+               g_context.pass_count_total, max_result_width / 2, g_context.assert_count_total,
+               ANSI_STYLE_RESET ANSI_COLOR_HEADER BOX_VERTICAL, ANSI_COLOR_RESET);
+    // Only show if any tests were failed
+    if (g_context.fail_count_total > 0)
+        printf("%s%s %-*s %s \x1b[1m\x1b[4m%-*zu\x1b[0m / \x1b[1m\x1b[3m%-*zu %s%s\n", ANSI_COLOR_HEADER,
+               BOX_VERTICAL ANSI_COLOR_RESET ANSI_STYLE_REVERSE, col1_width, "Failed",
+               ANSI_STYLE_RESET ANSI_COLOR_HEADER BOX_VERTICAL ANSI_COLOR_RED, max_result_width / 2 - 1,
+               g_context.fail_count_total, max_result_width / 2, g_context.assert_count_total,
+               ANSI_STYLE_RESET ANSI_COLOR_HEADER BOX_VERTICAL, ANSI_COLOR_RESET);
+    // Only show if any tests were skipped
+    if (g_context.skip_count_total > 0)
+        printf("%s%s %-*s %s \x1b[1m\x1b[4m%-*zu\x1b[0m / \x1b[1m\x1b[3m%-*zu %s%s\n", ANSI_COLOR_HEADER,
+               BOX_VERTICAL ANSI_COLOR_RESET ANSI_STYLE_REVERSE, col1_width, "Skipped",
+               ANSI_STYLE_RESET ANSI_COLOR_HEADER BOX_VERTICAL ANSI_COLOR_YELLOW, max_result_width / 2 - 1,
+               g_context.skip_count_total, max_result_width / 2, g_context.assert_count_total,
+               ANSI_STYLE_RESET ANSI_COLOR_HEADER BOX_VERTICAL, ANSI_COLOR_RESET);
 
-    printf("%s%s %-*s %s \x1b[1m\x1b[4m%-*zu / %-*zu\x1b[0m  %s%s\n", ANSI_COLOR_HEADER,
-           BOX_VERTICAL ANSI_COLOR_RESET ANSI_STYLE_REVERSE, col1_width, "Passed",
-           ANSI_STYLE_RESET ANSI_COLOR_HEADER BOX_VERTICAL ANSI_COLOR_GREEN, 2, g_context.pass_count_total, 2,
-           g_context.assert_count_total, ANSI_STYLE_RESET ANSI_COLOR_HEADER BOX_VERTICAL, ANSI_COLOR_RESET);
-    printf("%s%s %-*s %s \x1b[1m\x1b[4m%-*zu / %-*zu\x1b[0m  %s%s\n", ANSI_COLOR_HEADER,
-           BOX_VERTICAL ANSI_COLOR_RESET ANSI_STYLE_REVERSE, col1_width, "Failed",
-           ANSI_STYLE_RESET ANSI_COLOR_HEADER BOX_VERTICAL ANSI_COLOR_RED, 2, g_context.fail_count_total, 2,
-           g_context.assert_count_total, ANSI_STYLE_RESET ANSI_COLOR_HEADER BOX_VERTICAL, ANSI_COLOR_RESET);
-    printf("%s%s %-*s %s \x1b[1m\x1b[4m%-*zu / %-*zu\x1b[0m  %s%s\n", ANSI_COLOR_HEADER,
-           BOX_VERTICAL ANSI_COLOR_RESET ANSI_STYLE_REVERSE, col1_width, "Skipped",
-           ANSI_STYLE_RESET ANSI_COLOR_HEADER BOX_VERTICAL ANSI_COLOR_YELLOW, 2, g_context.skip_count_total, 2,
-           g_context.assert_count_total, ANSI_STYLE_RESET ANSI_COLOR_HEADER BOX_VERTICAL, ANSI_COLOR_RESET);
     // Table bottom border
     printf("%s%s", ANSI_COLOR_HEADER, BOX_VERTICAL_RIGHT);
     for (int i = 0; i < col1_width + 2; i++)
         printf("%s", BOX_HORIZONTAL);
     printf("%s", BOX_HORIZONTAL_UP);
-    for (int i = 0; i < col2_width - 2; i++)
+    for (int i = 0; i < col2_width; i++)
         printf("%s", BOX_HORIZONTAL);
     printf("%s%s\n", BOX_VERTICAL_LEFT, ANSI_COLOR_RESET);
 
     // Progress bar row
     printf("%s%s", ANSI_COLOR_HEADER, BOX_BOTTOM_LEFT);
-    for (int i = 0; i < 1; i++)
-        printf("%s", BOX_HORIZONTAL);
+    printf("%s", BOX_HORIZONTAL);
     printf("%s ", BOX_VERTICAL_LEFT);
     print_progress_bar(g_context.pass_count_total, g_context.assert_count_total);
     printf(" %s%.1f%% ", ANSI_COLOR_CYAN, (double)g_context.pass_count_total / g_context.assert_count_total * 100);
@@ -342,7 +346,7 @@ void cl_test_assert_null(const void *value, const char *value_str, const char *f
 {
     char *output = malloc(1024);
     snprintf(output, 1024, "%s is NULL", value_str);
-    return cl_test_assert(value == NULL, output, file, line);
+    return cl_test_assert(NULL == value, output, file, line);
 }
 
 void cl_test_assert_not_null(const void *value, const char *value_str, const char *file, int line)

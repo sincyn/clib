@@ -37,6 +37,7 @@ add_subdirectory(src/test_lib)
 add_subdirectory(src/thread_lib)
 add_subdirectory(src/time_lib)
 add_subdirectory(src/string_lib)
+add_subdirectory(src/containers_lib)
 
 # Create the unified clib_all library
 add_library(clib_all INTERFACE)
@@ -48,6 +49,7 @@ target_link_libraries(clib_all INTERFACE
         clib_thread
         clib_time
         clib_string
+        clib_containers
 )
 
 target_include_directories(clib_all INTERFACE

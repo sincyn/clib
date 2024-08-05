@@ -55,13 +55,13 @@ typedef struct
     u64 pass_count;
     u64 pass_count_total;
 
-    cl_test_assert_result_t pass_results[1024];
+    cl_test_assert_result_t pass_results[1024 * 8];
     u64 fail_count;
     u64 fail_count_total;
-    cl_test_assert_result_t fail_results[1024];
+    cl_test_assert_result_t fail_results[1024 * 8];
     u64 skip_count;
     u64 skip_count_total;
-    cl_test_assert_result_t skip_results[1024];
+    cl_test_assert_result_t skip_results[1024 * 8];
 
 } cl_test_context_t;
 
