@@ -88,6 +88,7 @@ CL_TEST(test_time_operations_consistency)
     int64_t converted_ms = cl_time_to_ms(&time);
     
     CL_ASSERT_EQUAL(original_ms, converted_ms);
+
 }
 
 CL_TEST_SUITE_BEGIN(TimeTests)

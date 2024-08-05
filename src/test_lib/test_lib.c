@@ -218,11 +218,11 @@ static void run_test(const char *suite_name, const char *test_name, cl_test_func
     char count_str[50];
     if (test_assert_count == test_pass_count)
     {
-        snprintf(count_str, sizeof(count_str), "%s%zu%s", ANSI_STYLE_UNDERLINE, test_pass_count, ANSI_STYLE_RESET);
+        snprintf(count_str, sizeof(count_str), "%s%zu%s", ANSI_STYLE_UNDERLINE, test_assert_count, ANSI_STYLE_RESET);
     }
     else if (test_fail_count > 0)
     {
-        snprintf(count_str, sizeof(count_str), "%s%zu%s", ANSI_STYLE_UNDERLINE, test_fail_count, ANSI_STYLE_RESET,
+        snprintf(count_str, sizeof(count_str), "%s%zu%s", ANSI_STYLE_UNDERLINE, test_assert_count, ANSI_STYLE_RESET,
                  test_assert_count);
     }
     else
@@ -249,14 +249,24 @@ static void run_test(const char *suite_name, const char *test_name, cl_test_func
         for (u64 i = initial_pass_count; i < g_context.pass_count; i++)
         {
             print_box_segment(ANSI_COLOR_HEADER BOX_VERTICAL_RIGHT ANSI_STYLE_RESET, "", " ", 3);
-            printf(ANSI_COLOR_GREEN "✓ %s" ANSI_COLOR_RESET "\n", g_context.pass_results[i].message);
+            printf(ANSI_COLOR_GREEN "✓ %s" ANSI_COLOR_RESET, g_context.pass_results[i].message);
+            // Add right vertical line
+            printf("%*s%s%s\n", OUTPUT_WIDTH - strlen(g_context.pass_results[i].message) - 5, "", ANSI_COLOR_HEADER,
+                   BOX_VERTICAL);
         }
         for (u64 i = initial_assert_count; i < g_context.fail_count; i++)
         {
             print_box_segment(ANSI_COLOR_HEADER BOX_VERTICAL_RIGHT ANSI_STYLE_RESET, "", " ", 3);
-            printf(ANSI_COLOR_RED "✗ %s" ANSI_COLOR_RESET "\n", g_context.fail_results[i].message);
+            printf(ANSI_COLOR_RED "✗ %s" ANSI_COLOR_RESET, g_context.fail_results[i].message);
+            // Add right vertical line
+            printf("%*s%s%s\n", OUTPUT_WIDTH - strlen(g_context.fail_results[i].message) - 5, "", ANSI_COLOR_HEADER,
+                   BOX_VERTICAL);
             print_box_segment(ANSI_COLOR_HEADER BOX_VERTICAL_RIGHT ANSI_STYLE_RESET, "", " ", 5);
-            printf("%s:%d\n", g_context.fail_results[i].file, g_context.fail_results[i].line);
+            printf("%s:%d", g_context.fail_results[i].file, g_context.fail_results[i].line);
+            // Add right vertical line
+            int file_line_length =
+                snprintf(NULL, 0, "%s:%d", g_context.fail_results[i].file, g_context.fail_results[i].line);
+            printf("%*s%s%s\n", OUTPUT_WIDTH - file_line_length - 5, "", ANSI_COLOR_HEADER, BOX_VERTICAL);
         }
     }
 
@@ -280,11 +290,12 @@ void cl_test_run_suite(const cl_test_suite_t *suite)
 
     print_box_segment(ANSI_COLOR_HEADER BOX_VERTICAL ANSI_STYLE_RESET, "", " ", 1);
     int name_length = strlen(suite->name);
-    int total_width = TEST_NAME_WIDTH -1;
+    int total_width = TEST_NAME_WIDTH - 1;
     int left_padding = (total_width - name_length) / 2;
     int right_padding = total_width - name_length - left_padding;
-    printf("%s%*s%s%s%s%*s%s\n", ANSI_COLOR_HEADER, left_padding, " ", ANSI_COLOR_BLUE ANSI_STYLE_DIM ANSI_STYLE_BOLD ANSI_STYLE_UNDERLINE ANSI_STYLE_REVERSE ,suite->name, ANSI_STYLE_RESET, right_padding, " ",
-           ANSI_COLOR_HEADER BOX_VERTICAL);
+    printf("%s%*s%s%s%s%*s%s\n", ANSI_COLOR_HEADER, left_padding, " ",
+           ANSI_COLOR_BLUE ANSI_STYLE_DIM ANSI_STYLE_BOLD ANSI_STYLE_UNDERLINE ANSI_STYLE_REVERSE, suite->name,
+           ANSI_STYLE_RESET, right_padding, " ", ANSI_COLOR_HEADER BOX_VERTICAL);
     // printf("%s%-*s%s%-*s%s ", ANSI_STYLE_REVERSE, TEST_NAME_WIDTH / 4, " ", suite->name, TEST_NAME_WIDTH / 4, " ",
     //        ANSI_STYLE_RESET);
 
@@ -351,7 +362,7 @@ void cl_test_run_all(void)
                ANSI_STYLE_RESET ANSI_COLOR_HEADER BOX_VERTICAL, ANSI_COLOR_RESET);
     // Only show if any tests were failed
     if (g_context.fail_count_total > 0)
-        printf("%s%s %-*s %s \x1b[1m\x1b[4m%-*zu\x1b[0m / \x1b[1m\x1b[3m%-*zu %s%s\n", ANSI_COLOR_HEADER,
+        printf("%s%s %-*s %s  \x1b[1m\x1b[4m%-*zu\x1b[0m / \x1b[1m\x1b[3m%-*zu %s%s\n", ANSI_COLOR_HEADER,
                BOX_VERTICAL ANSI_COLOR_RESET ANSI_STYLE_REVERSE, col1_width, "Failed",
                ANSI_STYLE_RESET ANSI_COLOR_HEADER BOX_VERTICAL ANSI_COLOR_RED, max_result_width / 2 - 1,
                g_context.fail_count_total, max_result_width / 2, g_context.assert_count_total,
@@ -378,11 +389,15 @@ void cl_test_run_all(void)
     printf("%s", BOX_HORIZONTAL);
     printf("%s ", BOX_VERTICAL_LEFT);
     print_progress_bar(g_context.pass_count_total, g_context.assert_count_total, 18);
-    printf(" %s%.1f%% ", ANSI_COLOR_CYAN, (double)g_context.pass_count_total / g_context.assert_count_total * 100);
+    char progress_str[50];
+    // printf(" %s%.1f%% ", ANSI_COLOR_CYAN, (double)g_context.pass_count_total / g_context.assert_count_total * 100);
+    snprintf(progress_str, sizeof(progress_str), "%.1f%%",
+             (double)g_context.pass_count_total / g_context.assert_count_total * 100);
+    int progress_length = strlen(progress_str);
+    int remaining_space = table_width - 25 - progress_length;
+    printf(" %s%s%s", ANSI_COLOR_CYAN, progress_str, ANSI_COLOR_HEADER);
     printf("%s%s", ANSI_COLOR_HEADER, BOX_VERTICAL_RIGHT);
-    // Fill the rest of the row with horizontal lines
-    int remaining_width = table_width - 32; // Approximate width of progress bar and percentage
-    for (int i = 0; i < remaining_width; i++)
+    for (int i = 0; i < remaining_space; i++)
         printf("%s", BOX_HORIZONTAL);
 
     printf("%s%s\n", ANSI_COLOR_HEADER, BOX_BOTTOM_RIGHT);
