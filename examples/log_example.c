@@ -16,19 +16,19 @@ int main()
     cl_log_target_t *console_target = cl_log_add_target(&console_config);
 
     // Log some messages
-    CL_LOG_TRACE("This is a trace message"); // This won't be displayed (below min_level)
-    CL_LOG_DEBUG("This is a debug message"); // This won't be displayed (below min_level)
-    CL_LOG_INFO("This is an info message");
-    CL_LOG_WARN("This is a warning message");
-    CL_LOG_ERROR("This is an error message");
-    CL_LOG_FATAL("This is a fatal error message");
+    cl_log_trace("This is a trace message"); // This won't be displayed (below min_level)
+    cl_log_debug("This is a debug message"); // This won't be displayed (below min_level)
+    cl_log_info("This is an info message");
+    cl_log_warn("This is a warning message");
+    cl_log_error("This is an error message");
+    cl_log_fatal("This is a fatal error message");
 
     // Change the console target's log level
     cl_log_set_target_level(console_target, CL_LOG_DEBUG);
 
     // Log more messages
-    CL_LOG_DEBUG("This debug message will now be displayed");
-    CL_LOG_INFO("Another info message");
+    cl_log_debug("This debug message will now be displayed");
+    cl_log_info("Another info message");
 
     // Shutdown the logging system
     cl_log_cleanup();

@@ -28,7 +28,7 @@ void *thread_func(void *arg)
         }
 
         // Do some work
-        CL_LOG_INFO("Thread %d: Counter = %d", thread_id, shared_counter);
+        cl_log_info("Thread %d: Counter = %d", thread_id, shared_counter);
         shared_counter++;
 
         // Signal the next thread
@@ -68,7 +68,7 @@ int main()
         threads[i] = cl_thread_create(thread_func, thread_id, CL_THREAD_FLAG_NONE);
         if (threads[i] == NULL)
         {
-            CL_LOG_ERROR("Failed to create thread %d", i);
+            cl_log_error("Failed to create thread %d", i);
             return 1;
         }
     }
@@ -84,7 +84,7 @@ int main()
     cl_mutex_destroy(mutex);
     cl_cond_destroy(cond);
 
-    CL_LOG_INFO("All threads completed. Final counter value: %d", shared_counter);
+    cl_log_info("All threads completed. Final counter value: %d", shared_counter);
 
     // Shutdown the logging system
     cl_log_cleanup();

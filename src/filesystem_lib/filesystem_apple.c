@@ -248,14 +248,14 @@ static void list_all_files(const char *path)
             struct stat st;
             if (lstat(full_path, &st) != 0)
             {
-                CL_LOG_ERROR("  Failed to stat %s: %s", full_path, strerror(errno));
+                cl_log_error("  Failed to stat %s: %s", full_path, strerror(errno));
             }
         }
         closedir(dir);
     }
     else
     {
-        CL_LOG_ERROR("Failed to open directory for listing: %s", strerror(errno));
+        cl_log_error("Failed to open directory for listing: %s", strerror(errno));
     }
 }
 
@@ -265,12 +265,12 @@ static void log_directory_permissions(const char *path)
     struct stat st;
     if (stat(path, &st) == 0)
     {
-        CL_LOG_INFO("Permissions for %s: %o", path, st.st_mode & 0777);
-        CL_LOG_INFO("Owner UID: %d, GID: %d", st.st_uid, st.st_gid);
+        cl_log_info("Permissions for %s: %o", path, st.st_mode & 0777);
+        cl_log_info("Owner UID: %d, GID: %d", st.st_uid, st.st_gid);
     }
     else
     {
-        CL_LOG_ERROR("Failed to get permissions for %s: %s", path, strerror(errno));
+        cl_log_error("Failed to get permissions for %s: %s", path, strerror(errno));
     }
 }
 
@@ -282,7 +282,7 @@ static int remove_callback(const char *fpath, const struct stat *sb, int typefla
         if (unlink(fpath) == -1)
         {
             status = -1;
-            CL_LOG_ERROR("Failed to remove file %s: %s", fpath, strerror(errno));
+            cl_log_error("Failed to remove file %s: %s", fpath, strerror(errno));
         }
     }
     else if (typeflag == FTW_D || typeflag == FTW_DP)
@@ -290,7 +290,7 @@ static int remove_callback(const char *fpath, const struct stat *sb, int typefla
         if (rmdir(fpath) == -1)
         {
             status = -1;
-            CL_LOG_ERROR("Failed to remove directory %s: %s", fpath, strerror(errno));
+            cl_log_error("Failed to remove directory %s: %s", fpath, strerror(errno));
         }
     }
     return status;
@@ -305,7 +305,7 @@ bool cl_fs_platform_remove_directory(cl_fs_t *fs, const char *path)
     {
         int err = errno;
         cl_fs_set_last_error(fs, strerror(err));
-        CL_LOG_ERROR("Failed to remove directory %s: %s (errno: %d)", path, strerror(err), err);
+        cl_log_error("Failed to remove directory %s: %s (errno: %d)", path, strerror(err), err);
         return false;
     }
 

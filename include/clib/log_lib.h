@@ -91,12 +91,12 @@ void cl_log_init_default(cl_log_level_t min_level);
 
 
 // Convenience macros for logging
-#define CL_LOG_TRACE(...) cl_log(CL_LOG_TRACE, __FILE__, __LINE__, __VA_ARGS__)
-#define CL_LOG_DEBUG(...) cl_log(CL_LOG_DEBUG, __FILE__, __LINE__, __VA_ARGS__)
-#define CL_LOG_INFO(...) cl_log(CL_LOG_INFO, __FILE__, __LINE__, __VA_ARGS__)
-#define CL_LOG_WARN(...) cl_log(CL_LOG_WARN, __FILE__, __LINE__, __VA_ARGS__)
-#define CL_LOG_ERROR(...) cl_log(CL_LOG_ERROR, __FILE__, __LINE__, __VA_ARGS__)
-#define CL_LOG_FATAL(...) cl_log(CL_LOG_FATAL, __FILE__, __LINE__, __VA_ARGS__)
+#define cl_log_trace(...) cl_log(CL_LOG_TRACE, __FILE__, __LINE__, __VA_ARGS__)
+#define cl_log_debug(...) cl_log(CL_LOG_DEBUG, __FILE__, __LINE__, __VA_ARGS__)
+#define cl_log_info(...) cl_log(CL_LOG_INFO, __FILE__, __LINE__, __VA_ARGS__)
+#define cl_log_warn(...) cl_log(CL_LOG_WARN, __FILE__, __LINE__, __VA_ARGS__)
+#define cl_log_error(...) cl_log(CL_LOG_ERROR, __FILE__, __LINE__, __VA_ARGS__)
+#define cl_log_fatal(...) cl_log(CL_LOG_FATAL, __FILE__, __LINE__, __VA_ARGS__)
 
 #ifdef __cplusplus
 }

@@ -73,12 +73,12 @@ static bool should_resize(cl_ht_t *ht)
 
 static bool resize(cl_ht_t *ht, u64 new_capacity)
 {
-    CL_LOG_DEBUG("Resizing hash table from %llu to %llu", ht->capacity, new_capacity);
+    cl_log_debug("Resizing hash table from %llu to %llu", ht->capacity, new_capacity);
 
     cl_ht_entry_t *new_entries = cl_mem_alloc(ht->allocator, new_capacity * sizeof(cl_ht_entry_t));
     if (new_entries == NULL)
     {
-        CL_LOG_ERROR("Failed to allocate memory for resizing");
+        cl_log_error("Failed to allocate memory for resizing");
         return false;
     }
 
@@ -106,7 +106,7 @@ static bool resize(cl_ht_t *ht, u64 new_capacity)
     ht->mask = new_mask;
     ht->deleted_count = 0;
 
-    CL_LOG_DEBUG("Resize complete. New capacity: %llu, New mask: %llx", ht->capacity, ht->mask);
+    cl_log_debug("Resize complete. New capacity: %llu, New mask: %llx", ht->capacity, ht->mask);
     return true;
 }
 
@@ -114,14 +114,14 @@ cl_ht_t *cl_ht_init(cl_allocator_t *allocator)
 {
     if (allocator == NULL)
     {
-        CL_LOG_ERROR("Null allocator provided to cl_ht_init");
+        cl_log_error("Null allocator provided to cl_ht_init");
         return NULL;
     }
 
     cl_ht_t *ht = cl_mem_alloc(allocator, sizeof(cl_ht_t));
     if (ht == NULL)
     {
-        CL_LOG_ERROR("Failed to allocate memory for hash table");
+        cl_log_error("Failed to allocate memory for hash table");
         return NULL;
     }
 
@@ -134,14 +134,14 @@ cl_ht_t *cl_ht_init(cl_allocator_t *allocator)
     ht->entries = cl_mem_alloc(allocator, ht->capacity * sizeof(cl_ht_entry_t));
     if (ht->entries == NULL)
     {
-        CL_LOG_ERROR("Failed to allocate memory for hash table entries");
+        cl_log_error("Failed to allocate memory for hash table entries");
         cl_mem_free(allocator, ht);
         return NULL;
     }
 
     memset(ht->entries, 0, ht->capacity * sizeof(cl_ht_entry_t));
 
-    CL_LOG_DEBUG("Hash table initialized. Capacity: %llu, Mask: %llx", ht->capacity, ht->mask);
+    cl_log_debug("Hash table initialized. Capacity: %llu, Mask: %llx", ht->capacity, ht->mask);
     return ht;
 }
 
@@ -154,7 +154,7 @@ void cl_ht_destroy(cl_ht_t *ht)
             cl_mem_free(ht->allocator, ht->entries);
         }
         cl_mem_free(ht->allocator, ht);
-        CL_LOG_DEBUG("Hash table destroyed");
+        cl_log_debug("Hash table destroyed");
     }
 }
 
@@ -162,17 +162,17 @@ bool cl_ht_insert(cl_ht_t *ht, const void *key, void *value)
 {
     if (ht == NULL || key == NULL)
     {
-        CL_LOG_ERROR("Null hash table or key provided to cl_ht_insert");
+        cl_log_error("Null hash table or key provided to cl_ht_insert");
         return false;
     }
 
-    CL_LOG_DEBUG("Inserting key: %s, Current size: %llu, Capacity: %llu", (const char *)key, ht->size, ht->capacity);
+    cl_log_debug("Inserting key: %s, Current size: %llu, Capacity: %llu", (const char *)key, ht->size, ht->capacity);
 
     if (should_resize(ht))
     {
         if (!resize(ht, ht->capacity * CL_HT_GROWTH_FACTOR))
         {
-            CL_LOG_ERROR("Resize failed during insert");
+            cl_log_error("Resize failed during insert");
             return false;
         }
     }
@@ -191,14 +191,14 @@ bool cl_ht_insert(cl_ht_t *ht, const void *key, void *value)
         {
             ht->deleted_count--;
         }
-        CL_LOG_DEBUG("Key inserted at index %llu, New size: %llu", index, ht->size);
+        cl_log_debug("Key inserted at index %llu, New size: %llu", index, ht->size);
         return true;
     }
     else
     {
         // Key already exists, update the value
         ht->entries[index].value = value;
-        CL_LOG_DEBUG("Key updated at index %llu", index);
+        cl_log_debug("Key updated at index %llu", index);
         return true;
     }
 }
@@ -207,7 +207,7 @@ void *cl_ht_get(const cl_ht_t *ht, const void *key)
 {
     if (ht == NULL || key == NULL)
     {
-        CL_LOG_ERROR("Null hash table or key provided to cl_ht_get");
+        cl_log_error("Null hash table or key provided to cl_ht_get");
         return NULL;
     }
 
@@ -216,12 +216,12 @@ void *cl_ht_get(const cl_ht_t *ht, const void *key)
 
     if (ht->entries[index].key != NULL && !ht->entries[index].is_deleted)
     {
-        CL_LOG_DEBUG("Key found at index %llu", index);
+        cl_log_debug("Key found at index %llu", index);
         return ht->entries[index].value;
     }
     else
     {
-        CL_LOG_DEBUG("Key not found: %s", (const char *)key);
+        cl_log_debug("Key not found: %s", (const char *)key);
         return NULL;
     }
 }
@@ -230,7 +230,7 @@ bool cl_ht_remove(cl_ht_t *ht, const void *key)
 {
     if (ht == NULL || key == NULL)
     {
-        CL_LOG_ERROR("Null hash table or key provided to cl_ht_remove");
+        cl_log_error("Null hash table or key provided to cl_ht_remove");
         return false;
     }
 
@@ -239,7 +239,7 @@ bool cl_ht_remove(cl_ht_t *ht, const void *key)
 
     if (ht->entries[index].key == NULL || ht->entries[index].is_deleted)
     {
-        CL_LOG_DEBUG("Key not found for removal: %s", (const char *)key);
+        cl_log_debug("Key not found for removal: %s", (const char *)key);
         return false;
     }
 
@@ -248,7 +248,7 @@ bool cl_ht_remove(cl_ht_t *ht, const void *key)
     ht->size--;
     ht->deleted_count++;
 
-    CL_LOG_DEBUG("Key removed: %s, New size: %llu, Deleted count: %llu", (const char *)key, ht->size,
+    cl_log_debug("Key removed: %s, New size: %llu, Deleted count: %llu", (const char *)key, ht->size,
                  ht->deleted_count);
 
     // Check if we need to resize (shrink) the hash table
@@ -271,7 +271,7 @@ void cl_ht_clear(cl_ht_t *ht)
         memset(ht->entries, 0, ht->capacity * sizeof(cl_ht_entry_t));
         ht->size = 0;
         ht->deleted_count = 0;
-        CL_LOG_DEBUG("Hash table cleared");
+        cl_log_debug("Hash table cleared");
     }
 }
 
@@ -307,21 +307,21 @@ cl_da_t *cl_da_init(cl_allocator_t *allocator, const u64 element_size)
 {
     if (allocator == NULL || element_size == 0)
     {
-        CL_LOG_ERROR("Invalid allocator or element size provided to cl_da_init");
+        cl_log_error("Invalid allocator or element size provided to cl_da_init");
         return NULL;
     }
 
     cl_da_t *da = cl_mem_alloc(allocator, sizeof(cl_da_t));
     if (da == NULL)
     {
-        CL_LOG_ERROR("Failed to allocate memory for dynamic array");
+        cl_log_error("Failed to allocate memory for dynamic array");
         return NULL;
     }
 
     da->data = cl_mem_alloc(allocator, CL_DA_INITIAL_CAPACITY * element_size);
     if (da->data == NULL)
     {
-        CL_LOG_ERROR("Failed to allocate memory for dynamic array data");
+        cl_log_error("Failed to allocate memory for dynamic array data");
         cl_mem_free(allocator, da);
         return NULL;
     }
@@ -331,7 +331,7 @@ cl_da_t *cl_da_init(cl_allocator_t *allocator, const u64 element_size)
     da->element_size = element_size;
     da->allocator = allocator;
 
-    CL_LOG_DEBUG("Dynamic array initialized. Capacity: %llu, Element size: %zu", da->capacity, da->element_size);
+    cl_log_debug("Dynamic array initialized. Capacity: %llu, Element size: %zu", da->capacity, da->element_size);
     return da;
 }
 
@@ -344,18 +344,18 @@ void cl_da_destroy(cl_da_t *da)
             cl_mem_free(da->allocator, da->data);
         }
         cl_mem_free(da->allocator, da);
-        CL_LOG_DEBUG("Dynamic array destroyed");
+        cl_log_debug("Dynamic array destroyed");
     }
 }
 
 static bool cl_da_resize(cl_da_t *da, u64 new_capacity)
 {
-    CL_LOG_DEBUG("Resizing dynamic array from %llu to %llu", da->capacity, new_capacity);
+    cl_log_debug("Resizing dynamic array from %llu to %llu", da->capacity, new_capacity);
 
     void *new_data = cl_mem_alloc(da->allocator, new_capacity * da->element_size);
     if (new_data == NULL)
     {
-        CL_LOG_ERROR("Failed to allocate memory for resizing");
+        cl_log_error("Failed to allocate memory for resizing");
         return false;
     }
 
@@ -364,7 +364,7 @@ static bool cl_da_resize(cl_da_t *da, u64 new_capacity)
     da->data = new_data;
     da->capacity = new_capacity;
 
-    CL_LOG_DEBUG("Resize complete. New capacity: %llu", da->capacity);
+    cl_log_debug("Resize complete. New capacity: %llu", da->capacity);
     return true;
 }
 
@@ -372,7 +372,7 @@ bool cl_da_push(cl_da_t *da, const void *element)
 {
     if (da == NULL || element == NULL)
     {
-        CL_LOG_ERROR("Null dynamic array or element provided to cl_da_push");
+        cl_log_error("Null dynamic array or element provided to cl_da_push");
         return false;
     }
 
@@ -380,7 +380,7 @@ bool cl_da_push(cl_da_t *da, const void *element)
     {
         if (!cl_da_resize(da, da->capacity * CL_DA_GROWTH_FACTOR))
         {
-            CL_LOG_ERROR("Resize failed during push");
+            cl_log_error("Resize failed during push");
             return false;
         }
     }
@@ -388,7 +388,7 @@ bool cl_da_push(cl_da_t *da, const void *element)
     memcpy((char *)da->data + da->size * da->element_size, element, da->element_size);
     da->size++;
 
-    CL_LOG_DEBUG("Element pushed. New size: %llu", da->size);
+    cl_log_debug("Element pushed. New size: %llu", da->size);
     return true;
 }
 
@@ -396,7 +396,7 @@ void *cl_da_get(const cl_da_t *da, u64 index)
 {
     if (da == NULL || index >= da->size)
     {
-        CL_LOG_ERROR("Invalid dynamic array or index provided to cl_da_get");
+        cl_log_error("Invalid dynamic array or index provided to cl_da_get");
         return NULL;
     }
 
@@ -407,12 +407,12 @@ bool cl_da_set(cl_da_t *da, u64 index, const void *element)
 {
     if (da == NULL || element == NULL || index >= da->size)
     {
-        CL_LOG_ERROR("Invalid dynamic array, element, or index provided to cl_da_set");
+        cl_log_error("Invalid dynamic array, element, or index provided to cl_da_set");
         return false;
     }
 
     memcpy((char *)da->data + index * da->element_size, element, da->element_size);
-    CL_LOG_DEBUG("Element set at index %llu", index);
+    cl_log_debug("Element set at index %llu", index);
     return true;
 }
 
@@ -420,7 +420,7 @@ bool cl_da_remove(cl_da_t *da, u64 index)
 {
     if (da == NULL || index >= da->size)
     {
-        CL_LOG_ERROR("Invalid dynamic array or index provided to cl_da_remove");
+        cl_log_error("Invalid dynamic array or index provided to cl_da_remove");
         return false;
     }
 
@@ -437,7 +437,7 @@ bool cl_da_remove(cl_da_t *da, u64 index)
         cl_da_resize(da, da->capacity / CL_DA_GROWTH_FACTOR);
     }
 
-    CL_LOG_DEBUG("Element removed at index %llu. New size: %llu", index, da->size);
+    cl_log_debug("Element removed at index %llu. New size: %llu", index, da->size);
     return true;
 }
 
@@ -450,7 +450,7 @@ void cl_da_clear(cl_da_t *da)
     if (da != NULL)
     {
         da->size = 0;
-        CL_LOG_DEBUG("Dynamic array cleared");
+        cl_log_debug("Dynamic array cleared");
     }
 }
 
@@ -475,26 +475,26 @@ cl_hs_t *cl_hs_init(cl_allocator_t *allocator)
 {
     if (allocator == NULL)
     {
-        CL_LOG_ERROR("Null allocator provided to cl_hs_init");
+        cl_log_error("Null allocator provided to cl_hs_init");
         return NULL;
     }
 
     cl_hs_t *hs = cl_mem_alloc(allocator, sizeof(cl_hs_t));
     if (hs == NULL)
     {
-        CL_LOG_ERROR("Failed to allocate memory for hash set");
+        cl_log_error("Failed to allocate memory for hash set");
         return NULL;
     }
 
     hs->table = cl_ht_init(allocator);
     if (hs->table == NULL)
     {
-        CL_LOG_ERROR("Failed to initialize hash table for hash set");
+        cl_log_error("Failed to initialize hash table for hash set");
         cl_mem_free(allocator, hs);
         return NULL;
     }
 
-    CL_LOG_DEBUG("Hash set initialized");
+    cl_log_debug("Hash set initialized");
     return hs;
 }
 
@@ -504,7 +504,7 @@ void cl_hs_destroy(cl_hs_t *hs)
     {
         cl_ht_destroy(hs->table);
         cl_mem_free(hs->table->allocator, hs);
-        CL_LOG_DEBUG("Hash set destroyed");
+        cl_log_debug("Hash set destroyed");
     }
 }
 
@@ -512,7 +512,7 @@ bool cl_hs_insert(cl_hs_t *hs, const void *element)
 {
     if (hs == NULL || element == NULL)
     {
-        CL_LOG_ERROR("Null hash set or element provided to cl_hs_insert");
+        cl_log_error("Null hash set or element provided to cl_hs_insert");
         return false;
     }
 
@@ -524,7 +524,7 @@ bool cl_hs_contains(const cl_hs_t *hs, const void *element)
 {
     if (hs == NULL || element == NULL)
     {
-        CL_LOG_ERROR("Null hash set or element provided to cl_hs_contains");
+        cl_log_error("Null hash set or element provided to cl_hs_contains");
         return false;
     }
 
@@ -535,7 +535,7 @@ bool cl_hs_remove(cl_hs_t *hs, const void *element)
 {
     if (hs == NULL || element == NULL)
     {
-        CL_LOG_ERROR("Null hash set or element provided to cl_hs_remove");
+        cl_log_error("Null hash set or element provided to cl_hs_remove");
         return false;
     }
 
@@ -551,7 +551,7 @@ void cl_hs_clear(cl_hs_t *hs)
     if (hs != NULL)
     {
         cl_ht_clear(hs->table);
-        CL_LOG_DEBUG("Hash set cleared");
+        cl_log_debug("Hash set cleared");
     }
 }
 

@@ -18,7 +18,7 @@ void run_server()
     cl_socket_t *server_socket = cl_socket_create(CL_AF_INET, CL_SOCK_STREAM);
     if (server_socket == NULL)
     {
-        CL_LOG_ERROR("Failed to create server socket");
+        cl_log_error("Failed to create server socket");
         return;
     }
 
@@ -30,25 +30,25 @@ void run_server()
 
     if (!cl_socket_bind(server_socket, &server_addr))
     {
-        CL_LOG_ERROR("Failed to bind server socket");
+        cl_log_error("Failed to bind server socket");
         cl_socket_destroy(server_socket);
         return;
     }
 
     if (!cl_socket_listen(server_socket, 5))
     {
-        CL_LOG_ERROR("Failed to listen on server socket");
+        cl_log_error("Failed to listen on server socket");
         cl_socket_destroy(server_socket);
         return;
     }
 
-    CL_LOG_INFO("Server listening on port %d", SERVER_PORT);
+    cl_log_info("Server listening on port %d", SERVER_PORT);
 
     cl_socket_address_t client_addr;
     cl_socket_t *client_socket = cl_socket_accept(server_socket, &client_addr);
     if (client_socket == NULL)
     {
-        CL_LOG_ERROR("Failed to accept client connection");
+        cl_log_error("Failed to accept client connection");
         cl_socket_destroy(server_socket);
         return;
     }
@@ -57,7 +57,7 @@ void run_server()
     uint16_t client_port;
     if (cl_socket_addr_to_string(&client_addr, client_ip, sizeof(client_ip), &client_port))
     {
-        CL_LOG_INFO("Client connected from %s:%d", client_ip, client_port);
+        cl_log_info("Client connected from %s:%d", client_ip, client_port);
     }
 
     char buffer[BUFFER_SIZE];
@@ -65,7 +65,7 @@ void run_server()
     if (bytes_received > 0)
     {
         buffer[bytes_received] = '\0';
-        CL_LOG_INFO("Received from client: %s", buffer);
+        cl_log_info("Received from client: %s", buffer);
 
         const char *response = "Hello from server!";
         cl_socket_send(client_socket, response, strlen(response));
@@ -80,26 +80,26 @@ void run_client()
     cl_socket_t *client_socket = cl_socket_create(CL_AF_INET, CL_SOCK_STREAM);
     if (client_socket == NULL)
     {
-        CL_LOG_ERROR("Failed to create client socket");
+        cl_log_error("Failed to create client socket");
         return;
     }
 
     cl_socket_address_t server_addr;
     if (!cl_socket_addr_from_string("127.0.0.1", SERVER_PORT, &server_addr))
     {
-        CL_LOG_ERROR("Failed to create server address");
+        cl_log_error("Failed to create server address");
         cl_socket_destroy(client_socket);
         return;
     }
 
     if (!cl_socket_connect(client_socket, &server_addr))
     {
-        CL_LOG_ERROR("Failed to connect to server");
+        cl_log_error("Failed to connect to server");
         cl_socket_destroy(client_socket);
         return;
     }
 
-    CL_LOG_INFO("Connected to server");
+    cl_log_info("Connected to server");
 
     const char *message = "Hello from client!";
     cl_socket_send(client_socket, message, strlen(message));
@@ -109,7 +109,7 @@ void run_client()
     if (bytes_received > 0)
     {
         buffer[bytes_received] = '\0';
-        CL_LOG_INFO("Received from server: %s", buffer);
+        cl_log_info("Received from server: %s", buffer);
     }
 
     cl_socket_destroy(client_socket);
@@ -126,7 +126,7 @@ int main(int argc, char *argv[])
 
     if (!cl_socket_init())
     {
-        CL_LOG_ERROR("Failed to initialize socket library");
+        cl_log_error("Failed to initialize socket library");
         return 1;
     }
 

@@ -10,13 +10,13 @@
 
 cl_fs_t *cl_fs_init(cl_allocator_t *allocator, const cl_fs_config_t *config) {
     if (allocator == null || config == null) {
-        CL_LOG_ERROR("Invalid allocator or config provided to cl_fs_init");
+        cl_log_error("Invalid allocator or config provided to cl_fs_init");
         return null;
     }
 
     cl_fs_t *fs = cl_mem_alloc(allocator, sizeof(cl_fs_t));
     if (fs == null) {
-        CL_LOG_ERROR("Failed to allocate memory for filesystem");
+        cl_log_error("Failed to allocate memory for filesystem");
         return null;
     }
 
@@ -30,7 +30,7 @@ cl_fs_t *cl_fs_init(cl_allocator_t *allocator, const cl_fs_config_t *config) {
         return null;
     }
 
-    CL_LOG_DEBUG("Filesystem initialized with type: %d", config->type);
+    cl_log_debug("Filesystem initialized with type: %d", config->type);
     return fs;
 }
 
@@ -38,7 +38,7 @@ void cl_fs_destroy(cl_fs_t *fs) {
     if (fs) {
         cl_fs_platform_cleanup(fs);
         cl_mem_free(fs->allocator, fs);
-        CL_LOG_DEBUG("Filesystem destroyed");
+        cl_log_debug("Filesystem destroyed");
     }
 }
 

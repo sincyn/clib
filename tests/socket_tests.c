@@ -22,14 +22,14 @@ static char client_received[BUFFER_SIZE];
 static bool server_done = false;
 static bool client_done = false;
 
-void *server_func( void *arg)
+void *server_func(void *arg)
 {
     (void)arg;
 
     cl_socket_t *server_socket = cl_socket_create(CL_AF_INET, CL_SOCK_STREAM);
     if (server_socket == NULL)
     {
-        CL_LOG_ERROR("Server: Failed to create socket");
+        cl_log_error("Server: Failed to create socket");
         return NULL;
     }
 
@@ -40,14 +40,14 @@ void *server_func( void *arg)
 
     if (!cl_socket_bind(server_socket, &addr))
     {
-        CL_LOG_ERROR("Server: Failed to bind");
+        cl_log_error("Server: Failed to bind");
         cl_socket_destroy(server_socket);
         return NULL;
     }
 
     if (!cl_socket_listen(server_socket, 5))
     {
-        CL_LOG_ERROR("Server: Failed to listen");
+        cl_log_error("Server: Failed to listen");
         cl_socket_destroy(server_socket);
         return NULL;
     }
@@ -58,29 +58,29 @@ void *server_func( void *arg)
     cl_cond_broadcast(cond); // Changed to broadcast
     cl_mutex_unlock(mutex);
 
-    CL_LOG_DEBUG("Server: Waiting for client connection");
+    cl_log_debug("Server: Waiting for client connection");
     cl_socket_t *client_socket = cl_socket_accept(server_socket, NULL);
     if (client_socket == NULL)
     {
-        CL_LOG_ERROR("Server: Failed to accept client connection");
+        cl_log_error("Server: Failed to accept client connection");
         cl_socket_destroy(server_socket);
         return NULL;
     }
 
-    CL_LOG_DEBUG("Server: Client connected, receiving data");
+    cl_log_debug("Server: Client connected, receiving data");
     int received = cl_socket_recv(client_socket, server_received, BUFFER_SIZE - 1);
     if (received <= 0)
     {
-        CL_LOG_WARN("Server: Failed to receive data");
+        cl_log_warn("Server: Failed to receive data");
     }
     else
     {
         server_received[received] = '\0';
-        CL_LOG_DEBUG("Server: Received '%s'", server_received);
+        cl_log_debug("Server: Received '%s'", server_received);
 
         if (cl_socket_send(client_socket, server_received, strlen(server_received)) <= 0)
         {
-            CL_LOG_WARN("Server: Failed to send data");
+            cl_log_warn("Server: Failed to send data");
         }
     }
 
@@ -95,7 +95,7 @@ void *server_func( void *arg)
     return NULL;
 }
 
-void *client_func( void *arg)
+void *client_func(void *arg)
 {
     (void)arg;
 
@@ -105,13 +105,13 @@ void *client_func( void *arg)
 
     while (!server_ready)
     {
-        CL_LOG_INFO("Client: Waiting for server to be ready");
+        cl_log_info("Client: Waiting for server to be ready");
         if (!cl_cond_timedwait(cond, mutex, 1000)) // Wait for 1 second at a time
         {
             cl_time_get_current(&current_time);
             if (cl_time_to_ms(&current_time) - cl_time_to_ms(&start_time) >= TIMEOUT_MS)
             {
-                CL_LOG_INFO("Client: Timeout waiting for server");
+                cl_log_info("Client: Timeout waiting for server");
                 cl_mutex_unlock(mutex);
                 return NULL;
             }
@@ -119,46 +119,46 @@ void *client_func( void *arg)
     }
     cl_mutex_unlock(mutex);
 
-    CL_LOG_DEBUG("Client: Server is ready, creating socket");
+    cl_log_debug("Client: Server is ready, creating socket");
     cl_socket_t *client_socket = cl_socket_create(CL_AF_INET, CL_SOCK_STREAM);
     if (client_socket == NULL)
     {
-        CL_LOG_INFO("Client: Failed to create socket");
+        cl_log_info("Client: Failed to create socket");
         return NULL;
     }
 
     cl_socket_address_t addr = {0};
     if (!cl_socket_addr_from_string("127.0.0.1", TEST_PORT, &addr))
     {
-        CL_LOG_INFO("Client: Failed to create address");
+        cl_log_info("Client: Failed to create address");
         cl_socket_destroy(client_socket);
         return NULL;
     }
 
     if (!cl_socket_connect(client_socket, &addr))
     {
-        CL_LOG_INFO("Client: Failed to connect");
+        cl_log_info("Client: Failed to connect");
         cl_socket_destroy(client_socket);
         return NULL;
     }
 
-    CL_LOG_INFO("Client: Connected, sending message");
+    cl_log_info("Client: Connected, sending message");
     if (cl_socket_send(client_socket, TEST_MESSAGE, strlen(TEST_MESSAGE)) <= 0)
     {
-        CL_LOG_INFO("Client: Failed to send data");
+        cl_log_info("Client: Failed to send data");
     }
     else
     {
-        CL_LOG_INFO("Client: Message sent, waiting for response");
+        cl_log_info("Client: Message sent, waiting for response");
         int received = cl_socket_recv(client_socket, client_received, BUFFER_SIZE - 1);
         if (received <= 0)
         {
-            CL_LOG_INFO("Client: Failed to receive data");
+            cl_log_info("Client: Failed to receive data");
         }
         else
         {
             client_received[received] = '\0';
-            CL_LOG_INFO("Client: Received '%s'", client_received);
+            cl_log_info("Client: Received '%s'", client_received);
         }
     }
 
@@ -169,13 +169,13 @@ void *client_func( void *arg)
     cl_cond_signal(cond);
     cl_mutex_unlock(mutex);
 
-    CL_LOG_INFO("Client: Done");
+    cl_log_info("Client: Done");
     return NULL;
 }
 
 CL_TEST(test_socket_full_communication)
 {
-    CL_LOG_INFO("Starting full communication test");
+    cl_log_info("Starting full communication test");
 
     mutex = cl_mutex_create();
     cond = cl_cond_create();
@@ -194,14 +194,14 @@ CL_TEST(test_socket_full_communication)
     cl_mutex_lock(mutex);
     while ((!server_done || !client_done) && cl_time_to_ms(&current_time) - cl_time_to_ms(&start_time) < TIMEOUT_MS)
     {
-        CL_LOG_INFO("Waiting for threads to complete (Server: %s, Client: %s)", server_done ? "Done" : "Not Done",
+        cl_log_info("Waiting for threads to complete (Server: %s, Client: %s)", server_done ? "Done" : "Not Done",
                     client_done ? "Done" : "Not Done");
         cl_cond_timedwait(cond, mutex, 1000); // Wait for 1 second at a time
         cl_time_get_current(&current_time);
     }
     cl_mutex_unlock(mutex);
 
-    CL_LOG_INFO("Threads complete or timeout reached");
+    cl_log_info("Threads complete or timeout reached");
 
     cl_thread_join(server_thread, NULL);
     cl_thread_join(client_thread, NULL);
@@ -211,13 +211,13 @@ CL_TEST(test_socket_full_communication)
     cl_mutex_destroy(mutex);
     cl_cond_destroy(cond);
 
-    CL_LOG_INFO("Asserting results");
+    cl_log_info("Asserting results");
     CL_ASSERT_EQUAL(server_done, true);
     CL_ASSERT_EQUAL(client_done, true);
     CL_ASSERT_STRING_EQUAL(server_received, TEST_MESSAGE);
     CL_ASSERT_STRING_EQUAL(client_received, TEST_MESSAGE);
 
-    CL_LOG_INFO("Full communication test complete");
+    cl_log_info("Full communication test complete");
 }
 
 

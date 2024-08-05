@@ -35,10 +35,10 @@ void teardown() {
 CL_TEST(test_directory_operations) {
     char cwd[1024];
     if (getcwd(cwd, sizeof(cwd)) == NULL) {
-        CL_LOG_ERROR("Failed to get current working directory");
+        cl_log_error("Failed to get current working directory");
         return;
     }
-    CL_LOG_INFO("Current working directory: %s", cwd);
+    cl_log_info("Current working directory: %s", cwd);
 
     char full_test_dir[1024];
     snprintf(full_test_dir, sizeof(full_test_dir), "%s/%s", cwd, TEST_DIR);
@@ -46,13 +46,13 @@ CL_TEST(test_directory_operations) {
     // Create directory
     bool result = cl_fs_create_directory(fs, full_test_dir);
     if (!result) {
-        CL_LOG_ERROR("Failed to create directory: %s", cl_fs_get_last_error(fs));
+        cl_log_error("Failed to create directory: %s", cl_fs_get_last_error(fs));
     }
     CL_ASSERT(result);
 
     result = cl_fs_directory_exists(fs, full_test_dir);
     if (!result) {
-        CL_LOG_ERROR("Directory does not exist after creation: %s", cl_fs_get_last_error(fs));
+        cl_log_error("Directory does not exist after creation: %s", cl_fs_get_last_error(fs));
     }
     CL_ASSERT(result);
 
@@ -61,39 +61,39 @@ CL_TEST(test_directory_operations) {
     snprintf(nested_dir, sizeof(nested_dir), "%s/nested", full_test_dir);
     result = cl_fs_create_directory(fs, nested_dir);
     if (!result) {
-        CL_LOG_ERROR("Failed to create nested directory: %s", cl_fs_get_last_error(fs));
+        cl_log_error("Failed to create nested directory: %s", cl_fs_get_last_error(fs));
     }
     CL_ASSERT(result);
 
     result = cl_fs_directory_exists(fs, nested_dir);
     if (!result) {
-        CL_LOG_ERROR("Nested directory does not exist after creation: %s", cl_fs_get_last_error(fs));
+        cl_log_error("Nested directory does not exist after creation: %s", cl_fs_get_last_error(fs));
     }
     CL_ASSERT(result);
 
     // Remove nested directory
     result = cl_fs_remove_directory(fs, nested_dir);
     if (!result) {
-        CL_LOG_ERROR("Failed to remove nested directory: %s", cl_fs_get_last_error(fs));
+        cl_log_error("Failed to remove nested directory: %s", cl_fs_get_last_error(fs));
     }
     CL_ASSERT(result);
 
     result = cl_fs_directory_exists(fs, nested_dir);
     if (result) {
-        CL_LOG_ERROR("Nested directory still exists after removal");
+        cl_log_error("Nested directory still exists after removal");
     }
     CL_ASSERT(!result);
 
     // Remove main directory
     result = cl_fs_remove_directory(fs, full_test_dir);
     if (!result) {
-        CL_LOG_ERROR("Failed to remove main directory: %s", cl_fs_get_last_error(fs));
+        cl_log_error("Failed to remove main directory: %s", cl_fs_get_last_error(fs));
     }
     CL_ASSERT(result);
 
     result = cl_fs_directory_exists(fs, full_test_dir);
     if (result) {
-        CL_LOG_ERROR("Main directory still exists after removal");
+        cl_log_error("Main directory still exists after removal");
     }
     CL_ASSERT(!result);
 }
@@ -347,12 +347,12 @@ CL_TEST(test_path_normalization) {
     for (int i = 0; i < 5; i++) {
         char *normalized = cl_fs_normalize_path(fs, test_paths[i]);
         CL_ASSERT_NOT_NULL(normalized);
-        CL_LOG_INFO("Original: %s", test_paths[i]);
-        CL_LOG_INFO("Normalized: %s", normalized);
+        cl_log_info("Original: %s", test_paths[i]);
+        cl_log_info("Normalized: %s", normalized);
 
         char *denormalized = cl_fs_denormalize_path(fs, normalized);
         CL_ASSERT_NOT_NULL(denormalized);
-        CL_LOG_INFO("Denormalized: %s", denormalized);
+        cl_log_info("Denormalized: %s", denormalized);
 
         // Check that normalizing the denormalized path gives the same result
         char *renormalized = cl_fs_normalize_path(fs, denormalized);
