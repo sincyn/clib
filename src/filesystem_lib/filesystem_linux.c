@@ -5,20 +5,25 @@
 
 #include "clib/defines.h"
 #if defined(CL_PLATFORM_LINUX)
-
-#include <clib/log_lib.h>
-#include <dirent.h>
-#include <errno.h>
-#include <fcntl.h>
+#define _XOPEN_SOURCE 500
+#define _GNU_SOURCE
 #include <ftw.h>
+#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
 #include <string.h>
+#include <fcntl.h>
 #include <sys/stat.h>
-#include <sys/sysmacros.h>
-#include <unistd.h>
+#include <sys/types.h>
 #include "filesystem_internal.h"
+#ifndef FTW_DEPTH
+#define FTW_DEPTH 4
+#endif
 
+#ifndef FTW_PHYS
+#define FTW_PHYS 1
+#endif
 
 char *cl_fs_platform_normalize_path(cl_fs_t *fs, const char *path)
 {
@@ -223,6 +228,10 @@ bool cl_fs_platform_create_directory(cl_fs_t *fs, const char *path)
 
 static int remove_callback(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
 {
+    (void)sb;      // Unused parameter
+    (void)typeflag; // Unused parameter
+    (void)ftwbuf;   // Unused parameter
+
     int status = remove(fpath);
     if (status != 0)
     {
@@ -320,6 +329,7 @@ bool cl_fs_platform_copy(cl_fs_t *fs, const char *src_path, const char *dest_pat
     close(dest_fd);
     return success;
 }
+
 
 bool cl_fs_platform_file_exists(cl_fs_t *fs, const char *path)
 {
