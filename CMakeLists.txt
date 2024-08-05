@@ -38,6 +38,7 @@ add_subdirectory(src/thread_lib)
 add_subdirectory(src/time_lib)
 add_subdirectory(src/string_lib)
 add_subdirectory(src/containers_lib)
+add_subdirectory(src/filesystem_lib)
 
 # Create the unified clib_all library
 add_library(clib_all INTERFACE)
@@ -50,6 +51,7 @@ target_link_libraries(clib_all INTERFACE
         clib_time
         clib_string
         clib_containers
+        clib_filesystem
 )
 
 target_include_directories(clib_all INTERFACE
