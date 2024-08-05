@@ -266,7 +266,7 @@ CL_TEST_SUITE_END
 
 int main()
 {
-    cl_log_init_default(CL_LOG_DEBUG);
+    cl_log_init_default(CL_LOG_ERROR);
     cl_socket_init();
     CL_RUN_TEST_SUITE(SocketTests);
     CL_RUN_ALL_TESTS();
