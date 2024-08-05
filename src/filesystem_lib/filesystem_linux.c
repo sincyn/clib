@@ -1,12 +1,11 @@
 /**
- * Abstract Filesystem Library - Apple Implementation
- * Created by Claude on 8/5/2024.
- * Updated by Assistant on 8/5/2024.
+ * Abstract Filesystem Library - Linux Implementation
+ * Created by Assistant on 8/5/2024.
  */
 
-
 #include "clib/defines.h"
-#if defined(CL_PLATFORM_APPLE)
+#if defined(CL_PLATFORM_LINUX)
+
 #include <clib/log_lib.h>
 #include <dirent.h>
 #include <errno.h>
@@ -16,20 +15,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <sys/syslimits.h>
+#include <sys/sysmacros.h>
 #include <unistd.h>
 #include "filesystem_internal.h"
 
-bool cl_fs_platform_init(cl_fs_t *fs)
-{
-    // Apple-specific initialization (if needed)
-    return true;
-}
-
-void cl_fs_platform_cleanup(cl_fs_t *fs)
-{
-    // Apple-specific cleanup (if needed)
-}
 
 char *cl_fs_platform_normalize_path(cl_fs_t *fs, const char *path)
 {
@@ -113,10 +102,9 @@ char *cl_fs_platform_normalize_path(cl_fs_t *fs, const char *path)
     return normalized;
 }
 
-
 char *cl_fs_platform_denormalize_path(cl_fs_t *fs, const char *normalized_path)
 {
-    // For Apple, we'll just return a copy of the normalized path
+    // For Linux, we'll just return a copy of the normalized path
     // as denormalization is not typically needed on Unix-like systems
     char *denormalized = cl_mem_alloc(fs->allocator, strlen(normalized_path) + 1);
     if (denormalized == NULL)
@@ -153,15 +141,15 @@ cl_file_t *cl_fs_platform_open_file(cl_fs_t *fs, const char *path, cl_file_mode_
     if (fd == -1)
     {
         cl_fs_set_last_error(fs, strerror(errno));
-        return null;
+        return NULL;
     }
 
     cl_file_t *file = cl_mem_alloc(fs->allocator, sizeof(cl_file_t));
-    if (file == null)
+    if (file == NULL)
     {
         close(fd);
         cl_fs_set_last_error(fs, "Failed to allocate memory for file handle");
-        return null;
+        return NULL;
     }
 
     file->fs = fs;
@@ -232,75 +220,22 @@ bool cl_fs_platform_create_directory(cl_fs_t *fs, const char *path)
     return true;
 }
 
-
-static void list_all_files(const char *path)
-{
-    DIR *dir;
-    struct dirent *ent;
-    char full_path[1024];
-
-
-    if ((dir = opendir(path)) != NULL)
-    {
-        while ((ent = readdir(dir)) != NULL)
-        {
-            snprintf(full_path, sizeof(full_path), "%s/%s", path, ent->d_name);
-            struct stat st;
-            if (lstat(full_path, &st) != 0)
-            {
-                CL_LOG_ERROR("  Failed to stat %s: %s", full_path, strerror(errno));
-            }
-        }
-        closedir(dir);
-    }
-    else
-    {
-        CL_LOG_ERROR("Failed to open directory for listing: %s", strerror(errno));
-    }
-}
-
-
-static void log_directory_permissions(const char *path)
-{
-    struct stat st;
-    if (stat(path, &st) == 0)
-    {
-        CL_LOG_INFO("Permissions for %s: %o", path, st.st_mode & 0777);
-        CL_LOG_INFO("Owner UID: %d, GID: %d", st.st_uid, st.st_gid);
-    }
-    else
-    {
-        CL_LOG_ERROR("Failed to get permissions for %s: %s", path, strerror(errno));
-    }
-}
-
 static int remove_callback(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
 {
     int status = 0;
-    if (typeflag == FTW_F || typeflag == FTW_SL)
+    if (typeflag == FTW_F || typeflag == FTW_SL || typeflag == FTW_D)
     {
-        if (unlink(fpath) == -1)
+        status = (typeflag == FTW_D) ? rmdir(fpath) : unlink(fpath);
+        if (status == -1)
         {
-            status = -1;
-            CL_LOG_ERROR("Failed to remove file %s: %s", fpath, strerror(errno));
-        }
-    }
-    else if (typeflag == FTW_D || typeflag == FTW_DP)
-    {
-        if (rmdir(fpath) == -1)
-        {
-            status = -1;
-            CL_LOG_ERROR("Failed to remove directory %s: %s", fpath, strerror(errno));
+            CL_LOG_ERROR("Failed to remove %s: %s", fpath, strerror(errno));
         }
     }
     return status;
 }
+
 bool cl_fs_platform_remove_directory(cl_fs_t *fs, const char *path)
 {
-    // CL_LOG_DEBUG("Attempting to remove directory: %s", path);
-
-    list_all_files(path);
-
     if (nftw(path, remove_callback, 64, FTW_DEPTH | FTW_PHYS) == -1)
     {
         int err = errno;
@@ -309,7 +244,6 @@ bool cl_fs_platform_remove_directory(cl_fs_t *fs, const char *path)
         return false;
     }
 
-    // CL_LOG_DEBUG("Successfully removed directory: %s", path);
     return true;
 }
 
@@ -414,7 +348,7 @@ bool cl_fs_platform_get_file_time(cl_fs_t *fs, const char *path, u64 *creation_t
     if (stat(path, &st) == 0)
     {
         if (creation_time)
-            *creation_time = (u64)st.st_birthtime;
+            *creation_time = (u64)st.st_ctime; // Note: This is change time, not creation time
         if (last_access_time)
             *last_access_time = (u64)st.st_atime;
         if (last_write_time)
@@ -428,18 +362,18 @@ bool cl_fs_platform_get_file_time(cl_fs_t *fs, const char *path, u64 *creation_t
 cl_fs_dir_iterator_t *cl_fs_platform_open_directory(cl_fs_t *fs, const char *path)
 {
     DIR *dir = opendir(path);
-    if (dir == null)
+    if (dir == NULL)
     {
         cl_fs_set_last_error(fs, strerror(errno));
-        return null;
+        return NULL;
     }
 
     cl_fs_dir_iterator_t *iterator = cl_mem_alloc(fs->allocator, sizeof(cl_fs_dir_iterator_t));
-    if (iterator == null)
+    if (iterator == NULL)
     {
         closedir(dir);
         cl_fs_set_last_error(fs, "Failed to allocate memory for directory iterator");
-        return null;
+        return NULL;
     }
 
     iterator->fs = fs;
@@ -447,12 +381,12 @@ cl_fs_dir_iterator_t *cl_fs_platform_open_directory(cl_fs_t *fs, const char *pat
 
     // Store the full path of the directory being opened
     iterator->path = cl_mem_alloc(fs->allocator, strlen(path) + 1);
-    if (iterator->path == null)
+    if (iterator->path == NULL)
     {
         closedir(dir);
         cl_mem_free(fs->allocator, iterator);
         cl_fs_set_last_error(fs, "Failed to allocate memory for directory path");
-        return null;
+        return NULL;
     }
     strcpy(iterator->path, path);
 
@@ -463,7 +397,7 @@ bool cl_fs_platform_read_directory(cl_fs_dir_iterator_t *iterator, cl_fs_dir_ent
 {
     struct dirent *dir_entry;
     errno = 0;
-    if ((dir_entry = readdir((DIR *)iterator->handle)) == null)
+    if ((dir_entry = readdir((DIR *)iterator->handle)) == NULL)
     {
         if (errno != 0)
         {
@@ -476,7 +410,7 @@ bool cl_fs_platform_read_directory(cl_fs_dir_iterator_t *iterator, cl_fs_dir_ent
     entry->is_directory = (dir_entry->d_type == DT_DIR);
 
     // Get additional file information
-    char full_path[MAX_PATH_LENGTH];
+    char full_path[PATH_MAX];
     snprintf(full_path, sizeof(full_path), "%s/%s", iterator->path, entry->name);
 
     struct stat st;
@@ -495,6 +429,7 @@ bool cl_fs_platform_read_directory(cl_fs_dir_iterator_t *iterator, cl_fs_dir_ent
     return true;
 }
 
+// ... (previous code remains the same)
 
 void cl_fs_platform_close_directory(cl_fs_dir_iterator_t *iterator)
 {
@@ -559,4 +494,4 @@ cl_file_attribute_t cl_fs_platform_get_file_attributes(cl_fs_t *fs, const char *
     return attributes;
 }
 
-#endif // CL_PLATFORM_APPLE
+#endif // CL_PLATFORM_LINUX

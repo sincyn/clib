@@ -1,6 +1,7 @@
 add_library(clib_filesystem
         filesystem_lib.c
         filesystem_apple.c
+        filesystem_linux.c
 )
 
 target_include_directories(clib_filesystem PUBLIC
