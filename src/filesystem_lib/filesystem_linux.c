@@ -222,21 +222,18 @@ bool cl_fs_platform_create_directory(cl_fs_t *fs, const char *path)
 
 static int remove_callback(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
 {
-    int status = 0;
-    if (typeflag == FTW_F || typeflag == FTW_SL || typeflag == FTW_D)
+    int status = remove(fpath);
+    if (status != 0)
     {
-        status = (typeflag == FTW_D) ? rmdir(fpath) : unlink(fpath);
-        if (status == -1)
-        {
-            CL_LOG_ERROR("Failed to remove %s: %s", fpath, strerror(errno));
-        }
+        CL_LOG_ERROR("Failed to remove %s: %s", fpath, strerror(errno));
     }
     return status;
 }
 
+
 bool cl_fs_platform_remove_directory(cl_fs_t *fs, const char *path)
 {
-    if (nftw(path, remove_callback, 64, FTW_DEPTH | FTW_PHYS) == -1)
+    if (nftw(path, remove_callback, 64, FTW_DEPTH) == -1)
     {
         int err = errno;
         cl_fs_set_last_error(fs, strerror(err));
