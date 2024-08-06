@@ -17,7 +17,8 @@ typedef struct
 
 // String view functions
 str_view str_view_create(const char *data, u32 length);
-#define str_view_lit(data) str_view_create(data, sizeof(data) - 1)
+#define str_view_lit(data)                                                                                             \
+    (str_view) { sizeof(data) - 1, data }
 str_view str_view_substr(const str_view *s, u32 start, u32 end);
 bool str_view_equals(const str_view *s1, const str_view *s2);
 bool str_view_contains(const str_view *haystack, const str_view *needle);
