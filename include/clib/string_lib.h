@@ -33,6 +33,7 @@ str str_from_view(const cl_allocator_t *allocator, const str_view *view);
 str str_concat(const cl_allocator_t *allocator, const str_view *s1, const str_view *s2);
 str *str_split(const cl_allocator_t *allocator, const str_view *s, char delimiter);
 str str_join(const cl_allocator_t *allocator, const str_view *strings, u32 count, const str_view *delimiter);
+void str_clear(str *s);
 void str_destroy(const cl_allocator_t *allocator, str *s);
 
 // Conversion functions

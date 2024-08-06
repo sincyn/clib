@@ -61,6 +61,7 @@ bool str_view_ends_with(const str_view *s, const str_view *suffix)
     return cl_mem_compare(s->data + s->len - suffix->len, suffix->data, suffix->len) == 0;
 }
 
+
 str_view str_view_trim(const str_view *s)
 {
     u32 start = 0;
@@ -164,6 +165,12 @@ str str_join(const cl_allocator_t *allocator, const str_view *strings, u32 count
     }
     result.data[total_len] = '\0';
     return result;
+}
+
+void str_clear(str *s)
+{
+    s->len = 0;
+    s->data[0] = '\0';
 }
 
 void str_destroy(const cl_allocator_t *allocator, str *s)

@@ -173,6 +173,18 @@ CL_TEST(test_str_as_view)
     cl_allocator_destroy(allocator);
 }
 
+CL_TEST(test_str_clear)
+{
+    cl_allocator_t *allocator =
+        cl_allocator_new(CL_ALLOCATOR_TYPE_PLATFORM, .flags = CL_ALLOCATOR_FLAG_NONE, .user_data = NULL);
+    str s = str_lit(allocator, "Hello, World!");
+    str_clear(&s);
+    CL_ASSERT_EQUAL(s.len, 0);
+    CL_ASSERT_EQUAL(s.data[0], '\0');
+    str_destroy(allocator, &s);
+    cl_allocator_destroy(allocator);
+}
+
 CL_TEST_SUITE_BEGIN(StringTests)
 CL_TEST_SUITE_TEST(test_str_view_create)
 CL_TEST_SUITE_TEST(test_str_view_lit)
@@ -190,6 +202,7 @@ CL_TEST_SUITE_TEST(test_str_concat)
 CL_TEST_SUITE_TEST(test_str_split)
 CL_TEST_SUITE_TEST(test_str_join)
 CL_TEST_SUITE_TEST(test_str_as_view)
+CL_TEST_SUITE_TEST(test_str_clear)
 CL_TEST_SUITE_END
 
 int main()
