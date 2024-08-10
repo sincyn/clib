@@ -168,14 +168,20 @@ i64 cl_fs_get_file_size(cl_fs_t *fs, const char *path) {
     return result;
 }
 
-bool cl_fs_get_file_time(cl_fs_t *fs, const char *path, u64 *creation_time, u64 *last_access_time, u64 *last_write_time) {
+bool cl_fs_get_file_time(cl_fs_t *fs, const char *path, u64 *creation_time, u64 *last_access_time, u64 *last_write_time)
+{
     char *normalized_path = cl_fs_normalize_path(fs, path);
-    if (normalized_path == null) {
+    if (normalized_path == null)
+    {
         return false;
     }
     bool result = cl_fs_platform_get_file_time(fs, normalized_path, creation_time, last_access_time, last_write_time);
     cl_mem_free(fs->allocator, normalized_path);
     return result;
+}
+cl_fs_dir_entry_t *cl_fs_current_working_directory(cl_fs_t *fs)
+{
+    return cl_fs_platform_current_working_directory(fs);
 }
 
 cl_fs_dir_iterator_t *cl_fs_open_directory(cl_fs_t *fs, const char *path) {

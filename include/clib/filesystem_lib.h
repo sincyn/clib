@@ -97,6 +97,7 @@ bool cl_fs_get_file_time(cl_fs_t *fs, const char *path, u64 *creation_time, u64 
                          u64 *last_write_time);
 
 // Directory listing
+cl_fs_dir_entry_t *cl_fs_current_working_directory(cl_fs_t *fs);
 cl_fs_dir_iterator_t *cl_fs_open_directory(cl_fs_t *fs, const char *path);
 bool cl_fs_read_directory(cl_fs_dir_iterator_t *iterator, cl_fs_dir_entry_t *entry);
 void cl_fs_close_directory(cl_fs_dir_iterator_t *iterator);

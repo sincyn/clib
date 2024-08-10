@@ -185,6 +185,28 @@ CL_TEST(test_str_clear)
     cl_allocator_destroy(allocator);
 }
 
+CL_TEST(test_str_dup)
+{
+    cl_allocator_t *allocator =
+        cl_allocator_new(CL_ALLOCATOR_TYPE_PLATFORM, .flags = CL_ALLOCATOR_FLAG_NONE, .user_data = NULL);
+    str s = str_dup(allocator, "Hello, World!");
+    CL_ASSERT_EQUAL(s.len, 13);
+    CL_ASSERT_EQUAL(strcmp(s.data, "Hello, World!"), 0);
+    str_destroy(allocator, &s);
+    cl_allocator_destroy(allocator);
+}
+
+CL_TEST(test_str_ndup)
+{
+    cl_allocator_t *allocator =
+        cl_allocator_new(CL_ALLOCATOR_TYPE_PLATFORM, .flags = CL_ALLOCATOR_FLAG_NONE, .user_data = NULL);
+    str s = str_ndup(allocator, "Hello, World!", 13);
+    CL_ASSERT_EQUAL(s.len, 13);
+    CL_ASSERT_EQUAL(strcmp(s.data, "Hello, World!"), 0);
+    str_destroy(allocator, &s);
+    cl_allocator_destroy(allocator);
+}
+
 CL_TEST_SUITE_BEGIN(StringTests)
 CL_TEST_SUITE_TEST(test_str_view_create)
 CL_TEST_SUITE_TEST(test_str_view_lit)
@@ -203,6 +225,8 @@ CL_TEST_SUITE_TEST(test_str_split)
 CL_TEST_SUITE_TEST(test_str_join)
 CL_TEST_SUITE_TEST(test_str_as_view)
 CL_TEST_SUITE_TEST(test_str_clear)
+CL_TEST_SUITE_TEST(test_str_dup)
+CL_TEST_SUITE_TEST(test_str_ndup)
 CL_TEST_SUITE_END
 
 int main()

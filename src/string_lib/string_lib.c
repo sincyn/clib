@@ -166,6 +166,16 @@ str str_join(const cl_allocator_t *allocator, const str_view *strings, u32 count
     result.data[total_len] = '\0';
     return result;
 }
+str str_ndup(const cl_allocator_t *allocator, const char *data, u32 length)
+{
+    str result;
+    result.len = length;
+    result.data = (char *)cl_mem_alloc(allocator, length + 1);
+    cl_mem_copy(result.data, data, length);
+    result.data[length] = '\0';
+    return result;
+}
+str str_dup(const cl_allocator_t *allocator, const char *data) { return str_ndup(allocator, data, strlen(data)); }
 
 void str_clear(str *s)
 {

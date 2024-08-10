@@ -62,7 +62,9 @@ i64 cl_fs_platform_get_file_size(cl_fs_t *fs, const char *path);
 bool cl_fs_platform_get_file_time(cl_fs_t *fs, const char *path, u64 *creation_time, u64 *last_access_time,
                                   u64 *last_write_time);
 
+
 cl_fs_dir_iterator_t *cl_fs_platform_open_directory(cl_fs_t *fs, const char *path);
+cl_fs_dir_entry_t *cl_fs_platform_current_working_directory(cl_fs_t *fs);
 bool cl_fs_platform_read_directory(cl_fs_dir_iterator_t *iterator, cl_fs_dir_entry_t *entry);
 void cl_fs_platform_close_directory(cl_fs_dir_iterator_t *iterator);
 

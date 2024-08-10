@@ -324,6 +324,42 @@ cl_fs_dir_iterator_t *cl_fs_platform_open_directory(cl_fs_t *fs, const char *pat
     return iterator;
 }
 
+cl_fs_dir_entry_t *cl_fs_platform_current_working_directory(cl_fs_t *fs)
+{
+    char *path = cl_mem_alloc(fs->allocator, MAX_PATH);
+    if (path == NULL)
+    {
+        cl_fs_set_last_error(fs, "Failed to allocate memory for current working directory");
+        return NULL;
+    }
+
+    // Gets the current path on windows and converts t
+    GetCurrentDirectory(MAX_PATH, path);
+    // normalizes it
+    char *normalized_path = cl_fs_platform_normalize_path(fs, path);
+    if (normalized_path == NULL)
+    {
+        cl_mem_free(fs->allocator, path);
+        return NULL;
+    }
+
+    cl_fs_dir_entry_t *entry = cl_mem_alloc(fs->allocator, sizeof(cl_fs_dir_entry_t));
+    if (entry == NULL)
+    {
+        cl_fs_set_last_error(fs, "Failed to allocate memory for directory entry");
+        cl_mem_free(fs->allocator, path);
+        cl_mem_free(fs->allocator, normalized_path);
+        return NULL;
+    }
+
+    entry->name = normalized_path;
+    entry->is_directory = true;
+    entry->size = 0;
+    entry->last_write_time = 0;
+
+    return entry;
+}
+
 bool cl_fs_platform_read_directory(cl_fs_dir_iterator_t *iterator, cl_fs_dir_entry_t *entry)
 {
     WIN32_FIND_DATAW find_data;
