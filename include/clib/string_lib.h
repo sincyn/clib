@@ -34,6 +34,8 @@ str str_concat(const cl_allocator_t *allocator, const str_view *s1, const str_vi
 str *str_split(const cl_allocator_t *allocator, const str_view *s, char delimiter);
 str str_join(const cl_allocator_t *allocator, const str_view *strings, u32 count, const str_view *delimiter);
 str str_from_int(const cl_allocator_t *allocator, i64 value);
+str str_dup(const cl_allocator_t *allocator, const char *s);
+str str_ndup(const cl_allocator_t *allocator, const char *s, u32 length);
 void str_clear(str *s);
 void str_destroy(const cl_allocator_t *allocator, str *s);
 

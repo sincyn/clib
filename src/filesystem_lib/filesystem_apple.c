@@ -458,6 +458,30 @@ cl_fs_dir_iterator_t *cl_fs_platform_open_directory(cl_fs_t *fs, const char *pat
 
     return iterator;
 }
+cl_fs_dir_entry_t *cl_fs_platform_current_working_directory(cl_fs_t *fs)
+{
+    char *path = getcwd(null, 0);
+    if (path == null)
+    {
+        cl_fs_set_last_error(fs, strerror(errno));
+        return null;
+    }
+
+    cl_fs_dir_entry_t *entry = cl_mem_alloc(fs->allocator, sizeof(cl_fs_dir_entry_t));
+    if (entry == null)
+    {
+        cl_fs_set_last_error(fs, "Failed to allocate memory for directory entry");
+        cl_mem_free(fs->allocator, path);
+        return null;
+    }
+
+    entry->name = path;
+    entry->is_directory = true;
+    entry->size = -1;
+    entry->last_write_time = 0;
+
+    return entry;
+}
 
 bool cl_fs_platform_read_directory(cl_fs_dir_iterator_t *iterator, cl_fs_dir_entry_t *entry)
 {

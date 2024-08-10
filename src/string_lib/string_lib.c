@@ -183,6 +183,16 @@ str str_from_int(const cl_allocator_t *allocator, i64 value)
     ptr[len] = '\0';
     return (str){len, ptr};
 }
+str str_dup(const cl_allocator_t *allocator, const char *s) { return str_ndup(allocator, s, strlen(s)); }
+str str_ndup(const cl_allocator_t *allocator, const char *s, u32 length)
+{
+    str result;
+    result.len = length;
+    result.data = (char *)cl_mem_alloc(allocator, length + 1);
+    cl_mem_copy(result.data, s, length);
+    result.data[length] = '\0';
+    return result;
+}
 
 void str_clear(str *s)
 {
