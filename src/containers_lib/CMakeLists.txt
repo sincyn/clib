@@ -1,5 +1,7 @@
 add_library(clib_containers
-        containers_lib.c
+        cl_ht.c
+        cl_da.c
+        cl_hs.c
 )
 
 target_include_directories(clib_containers PUBLIC
@@ -11,6 +13,7 @@ target_include_directories(clib_containers PUBLIC
 
 target_link_libraries(clib_containers
         clib_memory
+        clib_string
 )
 
 

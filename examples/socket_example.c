@@ -16,7 +16,7 @@
 void run_server()
 {
     cl_socket_t *server_socket = cl_socket_create(CL_AF_INET, CL_SOCK_STREAM);
-    if (server_socket == NULL)
+    if (server_socket == null)
     {
         cl_log_error("Failed to create server socket");
         return;
@@ -46,7 +46,7 @@ void run_server()
 
     cl_socket_address_t client_addr;
     cl_socket_t *client_socket = cl_socket_accept(server_socket, &client_addr);
-    if (client_socket == NULL)
+    if (client_socket == null)
     {
         cl_log_error("Failed to accept client connection");
         cl_socket_destroy(server_socket);
@@ -78,7 +78,7 @@ void run_server()
 void run_client()
 {
     cl_socket_t *client_socket = cl_socket_create(CL_AF_INET, CL_SOCK_STREAM);
-    if (client_socket == NULL)
+    if (client_socket == null)
     {
         cl_log_error("Failed to create client socket");
         return;

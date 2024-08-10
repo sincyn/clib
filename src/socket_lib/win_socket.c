@@ -15,7 +15,7 @@ void cl_socket_cleanup_platform(void) { WSACleanup(); }
 
 int cl_socket_create_platform(cl_address_family_t family, cl_socket_type_t type)
 {
-    return (int)WSASocket(cl_family_to_native(family), cl_type_to_native(type), 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+    return (int)WSASocket(cl_family_to_native(family), cl_type_to_native(type), 0, null, 0, WSA_FLAG_OVERLAPPED);
 }
 
 void cl_socket_close_platform(int handle) { closesocket((SOCKET)handle); }

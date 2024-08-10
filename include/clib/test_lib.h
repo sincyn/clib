@@ -91,7 +91,7 @@ void cl_test_skip(const char *reason);
 #define CL_ASSERT_NOT_EQUAL(actual, expected)                                                                          \
     cl_test_assert_not_equal(actual, expected, #actual, #expected, __FILE__, __LINE__)
 
-#define CL_ASSERT_NULL(value) cl_test_assert_null(value, #value, __FILE__, __LINE__)
+#define CL_ASSERT_null(value) cl_test_assert_null(value, #value, __FILE__, __LINE__)
 
 #define CL_ASSERT_NOT_NULL(value) cl_test_assert_not_null(value, #value, __FILE__, __LINE__)
 
@@ -132,7 +132,7 @@ cl_test_context_t *cl_test_get_context(void);
 
 #define CL_TEST_SUITE_END                                                                                              \
     {                                                                                                                  \
-        NULL, NULL                                                                                                     \
+        null, null                                                                                                     \
     }                                                                                                                  \
     }                                                                                                                  \
     ;

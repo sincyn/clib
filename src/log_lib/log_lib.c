@@ -81,7 +81,7 @@ static const char *level_strings[] = {"TRACE", "DEBUG", "INFO", "WARN", "ERROR",
 
 int cl_log_init(const cl_log_config_t *config)
 {
-    if (config == NULL)
+    if (config == null)
     {
         return -1;
     }
@@ -111,7 +111,7 @@ cl_log_target_t *cl_log_add_target(const cl_log_target_config_t *target_config)
 {
     if (log_context.target_count >= MAX_TARGETS)
     {
-        return NULL;
+        return null;
     }
 
     cl_log_target_t *target = &log_context.targets[log_context.target_count++];
@@ -129,7 +129,7 @@ cl_log_target_t *cl_log_add_target(const cl_log_target_config_t *target_config)
         // Add cases for other target types here
     default:
         log_context.target_count--;
-        return NULL;
+        return null;
     }
 
     if (target->init)
@@ -181,7 +181,7 @@ static void format_log_message(char *buffer, u64 buffer_size, cl_log_level_t lev
     // Format timestamp
     if (log_context.config.include_timestamp)
     {
-        time_t now = time(NULL);
+        time_t now = time(null);
         struct tm *tm_info = localtime(&now);
         if (log_context.config.use_short_time_format)
         {

@@ -15,9 +15,9 @@ static unsigned __stdcall win32_thread_func(void *arg)
 bool cl_thread_create_platform(cl_thread_t *thread)
 {
     thread->handle =
-        (HANDLE)_beginthreadex(NULL, 0, win32_thread_func, thread,
+        (HANDLE)_beginthreadex(null, 0, win32_thread_func, thread,
                                (thread->flags & CL_THREAD_FLAG_DETACHED) ? CREATE_SUSPENDED : 0, &thread->id);
-    if (thread->handle == NULL)
+    if (thread->handle == null)
     {
         return false;
     }
@@ -41,7 +41,7 @@ bool cl_thread_join_platform(cl_thread_t *thread, void **result)
     DWORD wait_result = WaitForSingleObject(thread->handle, INFINITE);
     if (wait_result != WAIT_OBJECT_0)
         return false;
-    if (result != NULL)
+    if (result != null)
     {
         DWORD exit_code;
         GetExitCodeThread(thread->handle, &exit_code);

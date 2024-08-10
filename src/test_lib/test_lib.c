@@ -107,7 +107,7 @@ void cl_test_cleanup(void)
 {
     for (u64 i = 0; i < g_suite_count; i++)
     {
-        g_suites[i] = NULL;
+        g_suites[i] = null;
     }
     g_suite_count = 0;
 }
@@ -265,7 +265,7 @@ static void run_test(const char *suite_name, const char *test_name, cl_test_func
             printf("%s:%d", g_context.fail_results[i].file, g_context.fail_results[i].line);
             // Add right vertical line
             int file_line_length =
-                snprintf(NULL, 0, "%s:%d", g_context.fail_results[i].file, g_context.fail_results[i].line);
+                snprintf(null, 0, "%s:%d", g_context.fail_results[i].file, g_context.fail_results[i].line);
             printf("%*s%s%s\n", OUTPUT_WIDTH - file_line_length - 5, "", ANSI_COLOR_HEADER, BOX_VERTICAL);
         }
     }
@@ -323,9 +323,9 @@ void cl_test_run_all(void)
     }
 
     // Calculate the width of the result strings
-    int passed_width = snprintf(NULL, 0, "%zu / %zu", g_context.pass_count_total, g_context.assert_count_total);
-    int failed_width = snprintf(NULL, 0, "%zu / %zu", g_context.fail_count_total, g_context.assert_count_total);
-    int skipped_width = snprintf(NULL, 0, "%zu / %zu", g_context.skip_count_total, g_context.assert_count_total);
+    int passed_width = snprintf(null, 0, "%zu / %zu", g_context.pass_count_total, g_context.assert_count_total);
+    int failed_width = snprintf(null, 0, "%zu / %zu", g_context.fail_count_total, g_context.assert_count_total);
+    int skipped_width = snprintf(null, 0, "%zu / %zu", g_context.skip_count_total, g_context.assert_count_total);
 
     // Find the maximum width
     int max_result_width = passed_width > failed_width ? passed_width : failed_width;
@@ -463,15 +463,15 @@ void cl_test_assert_not_equal(long long actual, long long expected, const char *
 void cl_test_assert_null(const void *value, const char *value_str, const char *file, int line)
 {
     char *output = malloc(1024);
-    snprintf(output, 1024, "%s is NULL", value_str);
-    return cl_test_assert(NULL == value, output, file, line);
+    snprintf(output, 1024, "%s is null", value_str);
+    return cl_test_assert(null == value, output, file, line);
 }
 
 void cl_test_assert_not_null(const void *value, const char *value_str, const char *file, int line)
 {
     char *output = malloc(1024);
-    snprintf(output, 1024, "%s is not NULL", value_str);
-    return cl_test_assert(value != NULL, output, file, line);
+    snprintf(output, 1024, "%s is not null", value_str);
+    return cl_test_assert(value != null, output, file, line);
 }
 
 void cl_test_assert_string_equal(const char *actual, const char *expected, const char *actual_str,

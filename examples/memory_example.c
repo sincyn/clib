@@ -10,7 +10,7 @@ int main()
 {
     // Create a platform allocator
     cl_allocator_t *allocator =
-        cl_allocator_new(CL_ALLOCATOR_TYPE_PLATFORM, .flags = CL_ALLOCATOR_FLAG_NONE, .user_data = NULL);
+        cl_allocator_new(CL_ALLOCATOR_TYPE_PLATFORM, .flags = CL_ALLOCATOR_FLAG_NONE, .user_data = null);
 
     // Allocate 100 bytes
     void *ptr = cl_mem_alloc(allocator, 100);

@@ -12,14 +12,14 @@ cl_socket_t *cl_socket_create(const cl_address_family_t family, const cl_socket_
     const int handle = cl_socket_create_platform(family, type);
     if (handle == -1)
     {
-        return NULL;
+        return null;
     }
 
-    cl_socket_t *socket = cl_mem_alloc(NULL, sizeof(cl_socket_t));
-    if (socket == NULL)
+    cl_socket_t *socket = cl_mem_alloc(null, sizeof(cl_socket_t));
+    if (socket == null)
     {
         cl_socket_close_platform(handle);
-        return NULL;
+        return null;
     }
 
     socket->handle = handle;
@@ -31,17 +31,17 @@ cl_socket_t *cl_socket_create(const cl_address_family_t family, const cl_socket_
 
 void cl_socket_destroy(cl_socket_t *socket)
 {
-    if (socket == NULL)
+    if (socket == null)
     {
         return;
     }
     cl_socket_close_platform(socket->handle);
-    cl_mem_free(NULL, socket);
+    cl_mem_free(null, socket);
 }
 
 bool cl_socket_bind(const cl_socket_t *socket, const cl_socket_address_t *address)
 {
-    if (socket == NULL || address == NULL)
+    if (socket == null || address == null)
     {
         return false;
     }
@@ -55,7 +55,7 @@ bool cl_socket_bind(const cl_socket_t *socket, const cl_socket_address_t *addres
 
 bool cl_socket_connect(const cl_socket_t *socket, const cl_socket_address_t *address)
 {
-    if (socket == NULL || address == NULL)
+    if (socket == null || address == null)
     {
         return false;
     }
@@ -69,7 +69,7 @@ bool cl_socket_connect(const cl_socket_t *socket, const cl_socket_address_t *add
 
 bool cl_socket_listen(const cl_socket_t *socket, const int backlog)
 {
-    if (socket == NULL)
+    if (socket == null)
     {
         return false;
     }
@@ -79,9 +79,9 @@ bool cl_socket_listen(const cl_socket_t *socket, const int backlog)
 
 cl_socket_t *cl_socket_accept(const cl_socket_t *socket, cl_socket_address_t *client_address)
 {
-    if (socket == NULL)
+    if (socket == null)
     {
-        return NULL;
+        return null;
     }
 
     struct sockaddr_storage native_addr;
@@ -90,21 +90,21 @@ cl_socket_t *cl_socket_accept(const cl_socket_t *socket, cl_socket_address_t *cl
     const int client_handle = cl_socket_accept_platform(socket->handle, (struct sockaddr *)&native_addr, &addr_len);
     if (client_handle == -1)
     {
-        return NULL;
+        return null;
     }
 
-    cl_socket_t *client_socket = cl_mem_alloc(NULL, sizeof(cl_socket_t));
-    if (client_socket == NULL)
+    cl_socket_t *client_socket = cl_mem_alloc(null, sizeof(cl_socket_t));
+    if (client_socket == null)
     {
         cl_socket_close_platform(client_handle);
-        return NULL;
+        return null;
     }
 
     client_socket->handle = client_handle;
     client_socket->family = socket->family;
     client_socket->type = socket->type;
 
-    if (client_address != NULL)
+    if (client_address != null)
     {
         cl_native_to_socket_address((struct sockaddr *)&native_addr, client_address);
     }
@@ -114,7 +114,7 @@ cl_socket_t *cl_socket_accept(const cl_socket_t *socket, cl_socket_address_t *cl
 
 int cl_socket_send(const cl_socket_t *socket, const void *buffer, const u64 length)
 {
-    if (socket == NULL || buffer == NULL)
+    if (socket == null || buffer == null)
     {
         return -1;
     }
@@ -124,7 +124,7 @@ int cl_socket_send(const cl_socket_t *socket, const void *buffer, const u64 leng
 
 int cl_socket_recv(const cl_socket_t *socket, void *buffer, const u64 length)
 {
-    if (socket == NULL || buffer == NULL)
+    if (socket == null || buffer == null)
     {
         return -1;
     }
@@ -135,7 +135,7 @@ int cl_socket_recv(const cl_socket_t *socket, void *buffer, const u64 length)
 int cl_socket_sendto(const cl_socket_t *socket, const void *buffer, const u64 length,
                      const cl_socket_address_t *address)
 {
-    if (socket == NULL || buffer == NULL || address == NULL)
+    if (socket == null || buffer == null || address == null)
     {
         return -1;
     }
@@ -149,7 +149,7 @@ int cl_socket_sendto(const cl_socket_t *socket, const void *buffer, const u64 le
 
 int cl_socket_recvfrom(const cl_socket_t *socket, void *buffer, const u64 length, cl_socket_address_t *address)
 {
-    if (socket == NULL || buffer == NULL)
+    if (socket == null || buffer == null)
     {
         return -1;
     }
@@ -160,7 +160,7 @@ int cl_socket_recvfrom(const cl_socket_t *socket, void *buffer, const u64 length
     const int received =
         cl_socket_recvfrom_platform(socket->handle, buffer, length, 0, (struct sockaddr *)&native_addr, &addr_len);
 
-    if (received >= 0 && address != NULL)
+    if (received >= 0 && address != null)
     {
         cl_native_to_socket_address((struct sockaddr *)&native_addr, address);
     }
@@ -171,7 +171,7 @@ int cl_socket_recvfrom(const cl_socket_t *socket, void *buffer, const u64 length
 bool cl_socket_set_option(const cl_socket_t *socket, const int level, const int option_name, const void *option_value,
                           const u64 option_len)
 {
-    if (socket == NULL || option_value == NULL)
+    if (socket == null || option_value == null)
     {
         return false;
     }
@@ -182,7 +182,7 @@ bool cl_socket_set_option(const cl_socket_t *socket, const int level, const int 
 bool cl_socket_get_option(const cl_socket_t *socket, const int level, const int option_name, void *option_value,
                           u64 *option_len)
 {
-    if (socket == NULL || option_value == NULL || option_len == NULL)
+    if (socket == null || option_value == null || option_len == null)
     {
         return false;
     }
@@ -196,7 +196,7 @@ bool cl_socket_get_option(const cl_socket_t *socket, const int level, const int 
 
 bool cl_socket_set_blocking(const cl_socket_t *socket, bool blocking)
 {
-    if (socket == NULL)
+    if (socket == null)
     {
         return false;
     }
@@ -206,7 +206,7 @@ bool cl_socket_set_blocking(const cl_socket_t *socket, bool blocking)
 
 bool cl_socket_addr_from_string(const char *ip_address, const uint16_t port, cl_socket_address_t *out_addr)
 {
-    if (ip_address == NULL || out_addr == NULL)
+    if (ip_address == null || out_addr == null)
     {
         return false;
     }
@@ -235,12 +235,12 @@ bool cl_socket_addr_from_string(const char *ip_address, const uint16_t port, cl_
 bool cl_socket_addr_to_string(const cl_socket_address_t *addr, char *ip_string, const u64 ip_string_size,
                               uint16_t *out_port)
 {
-    if (addr == NULL || ip_string == NULL || ip_string_size == 0 || out_port == NULL)
+    if (addr == null || ip_string == null || ip_string_size == 0 || out_port == null)
     {
         return false;
     }
 
-    const char *result = NULL;
+    const char *result = null;
 
     if (addr->family == CL_AF_INET)
     {
@@ -253,7 +253,7 @@ bool cl_socket_addr_to_string(const cl_socket_address_t *addr, char *ip_string, 
         result = inet_ntop(AF_INET6, addr->addr.ipv6, ip_string, ip_string_size);
     }
 
-    if (result == NULL)
+    if (result == null)
     {
         return false;
     }

@@ -1,4 +1,6 @@
 #include "clib/string_lib.h"
+
+#include <stdio.h>
 #include <string.h>
 
 // String view functions
@@ -8,7 +10,7 @@ str_view str_view_substr(const str_view *s, u32 start, u32 end)
 {
     if (start >= s->len || end > s->len || start > end)
     {
-        return (str_view){0, NULL};
+        return (str_view){0, null};
     }
     return (str_view){end - start, s->data + start};
 }
@@ -82,6 +84,12 @@ str_view str_view_trim(const str_view *s)
 
     return (str_view){end - start, s->data + start};
 }
+str_view str_view_from_int(i64 value)
+{
+    char buffer[32];
+    int len = snprintf(buffer, sizeof(buffer), "%lld", value);
+    return (str_view){len, buffer};
+}
 
 // Owned string functions
 str str_create(const cl_allocator_t *allocator, const char *data, u32 length)
@@ -135,7 +143,7 @@ str *str_split(const cl_allocator_t *allocator, const str_view *s, char delimite
     }
 
     result[index++] = str_create(allocator, s->data + start, s->len - start);
-    result[index] = (str){0, NULL}; // Null-terminate the array
+    result[index] = (str){0, null}; // Null-terminate the array
     return result;
 }
 
@@ -166,16 +174,15 @@ str str_join(const cl_allocator_t *allocator, const str_view *strings, u32 count
     result.data[total_len] = '\0';
     return result;
 }
-str str_ndup(const cl_allocator_t *allocator, const char *data, u32 length)
+str str_from_int(const cl_allocator_t *allocator, i64 value)
 {
-    str result;
-    result.len = length;
-    result.data = (char *)cl_mem_alloc(allocator, length + 1);
-    cl_mem_copy(result.data, data, length);
-    result.data[length] = '\0';
-    return result;
+    char buffer[32];
+    int len = snprintf(buffer, sizeof(buffer), "%lld", value);
+    char *ptr = cl_mem_alloc(allocator, len + 1);
+    cl_mem_copy(ptr, buffer, len);
+    ptr[len] = '\0';
+    return (str){len, ptr};
 }
-str str_dup(const cl_allocator_t *allocator, const char *data) { return str_ndup(allocator, data, strlen(data)); }
 
 void str_clear(str *s)
 {
@@ -186,7 +193,7 @@ void str_clear(str *s)
 void str_destroy(const cl_allocator_t *allocator, str *s)
 {
     cl_mem_free(allocator, s->data);
-    s->data = NULL;
+    s->data = null;
     s->len = 0;
 }
 

@@ -40,7 +40,7 @@ void *thread_func(void *arg)
     }
 
     free(arg);
-    return NULL;
+    return null;
 }
 
 int main()
@@ -66,7 +66,7 @@ int main()
         int *thread_id = malloc(sizeof(int));
         *thread_id = i;
         threads[i] = cl_thread_create(thread_func, thread_id, CL_THREAD_FLAG_NONE);
-        if (threads[i] == NULL)
+        if (threads[i] == null)
         {
             cl_log_error("Failed to create thread %d", i);
             return 1;
@@ -76,7 +76,7 @@ int main()
     // Wait for all threads to complete
     for (int i = 0; i < NUM_THREADS; ++i)
     {
-        cl_thread_join(threads[i], NULL);
+        cl_thread_join(threads[i], null);
         cl_thread_destroy(threads[i]);
     }
 

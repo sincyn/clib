@@ -27,10 +27,10 @@ void *server_func(void *arg)
     (void)arg;
 
     cl_socket_t *server_socket = cl_socket_create(CL_AF_INET, CL_SOCK_STREAM);
-    if (server_socket == NULL)
+    if (server_socket == null)
     {
         cl_log_error("Server: Failed to create socket");
-        return NULL;
+        return null;
     }
 
     cl_socket_address_t addr = {0};
@@ -42,14 +42,14 @@ void *server_func(void *arg)
     {
         cl_log_error("Server: Failed to bind");
         cl_socket_destroy(server_socket);
-        return NULL;
+        return null;
     }
 
     if (!cl_socket_listen(server_socket, 5))
     {
         cl_log_error("Server: Failed to listen");
         cl_socket_destroy(server_socket);
-        return NULL;
+        return null;
     }
 
 
@@ -59,12 +59,12 @@ void *server_func(void *arg)
     cl_mutex_unlock(mutex);
 
     cl_log_debug("Server: Waiting for client connection");
-    cl_socket_t *client_socket = cl_socket_accept(server_socket, NULL);
-    if (client_socket == NULL)
+    cl_socket_t *client_socket = cl_socket_accept(server_socket, null);
+    if (client_socket == null)
     {
         cl_log_error("Server: Failed to accept client connection");
         cl_socket_destroy(server_socket);
-        return NULL;
+        return null;
     }
 
     cl_log_debug("Server: Client connected, receiving data");
@@ -92,7 +92,7 @@ void *server_func(void *arg)
     cl_cond_signal(cond);
     cl_mutex_unlock(mutex);
 
-    return NULL;
+    return null;
 }
 
 void *client_func(void *arg)
@@ -113,7 +113,7 @@ void *client_func(void *arg)
             {
                 cl_log_info("Client: Timeout waiting for server");
                 cl_mutex_unlock(mutex);
-                return NULL;
+                return null;
             }
         }
     }
@@ -121,10 +121,10 @@ void *client_func(void *arg)
 
     cl_log_debug("Client: Server is ready, creating socket");
     cl_socket_t *client_socket = cl_socket_create(CL_AF_INET, CL_SOCK_STREAM);
-    if (client_socket == NULL)
+    if (client_socket == null)
     {
         cl_log_info("Client: Failed to create socket");
-        return NULL;
+        return null;
     }
 
     cl_socket_address_t addr = {0};
@@ -132,14 +132,14 @@ void *client_func(void *arg)
     {
         cl_log_info("Client: Failed to create address");
         cl_socket_destroy(client_socket);
-        return NULL;
+        return null;
     }
 
     if (!cl_socket_connect(client_socket, &addr))
     {
         cl_log_info("Client: Failed to connect");
         cl_socket_destroy(client_socket);
-        return NULL;
+        return null;
     }
 
     cl_log_info("Client: Connected, sending message");
@@ -170,7 +170,7 @@ void *client_func(void *arg)
     cl_mutex_unlock(mutex);
 
     cl_log_info("Client: Done");
-    return NULL;
+    return null;
 }
 
 CL_TEST(test_socket_full_communication)
@@ -185,8 +185,8 @@ CL_TEST(test_socket_full_communication)
     client_done = false;
     memset(server_received, 0, BUFFER_SIZE);
     memset(client_received, 0, BUFFER_SIZE);
-    server_thread = cl_thread_create(server_func, NULL, 0);
-    client_thread = cl_thread_create(client_func, NULL, 0);
+    server_thread = cl_thread_create(server_func, null, 0);
+    client_thread = cl_thread_create(client_func, null, 0);
 
     cl_time_t start_time, current_time;
     cl_time_get_current(&start_time);
@@ -203,8 +203,8 @@ CL_TEST(test_socket_full_communication)
 
     cl_log_info("Threads complete or timeout reached");
 
-    cl_thread_join(server_thread, NULL);
-    cl_thread_join(client_thread, NULL);
+    cl_thread_join(server_thread, null);
+    cl_thread_join(client_thread, null);
     cl_thread_destroy(server_thread);
     cl_thread_destroy(client_thread);
 

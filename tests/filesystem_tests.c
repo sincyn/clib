@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 
 /**
@@ -7,7 +6,7 @@
  */
 
 #include <string.h>
-
+#include <unistd.h>
 #include "clib/filesystem_lib.h"
 #include "clib/log_lib.h"
 #include "clib/memory_lib.h"
@@ -21,40 +20,38 @@ static cl_allocator_t *allocator;
 #define TEST_FILE_CONTENT "Hello, Filesystem!"
 #define LARGE_FILE_SIZE (10 * 1024 * 1024) // 10 MB
 
-void setup()
-{
+void setup() {
     allocator = cl_allocator_create(&(cl_allocator_config_t){.type = CL_ALLOCATOR_TYPE_PLATFORM});
     cl_fs_config_t config = {.type = CL_FS_TYPE_LOCAL, .root_path = "."};
     fs = cl_fs_init(allocator, &config);
     CL_ASSERT_NOT_NULL(fs);
 }
 
-void teardown()
-{
+void teardown() {
     cl_fs_destroy(fs);
     cl_allocator_destroy(allocator);
 }
 
-CL_TEST(test_directory_operations)
-{
-    cl_fs_dir_entry_t *cwd = cl_fs_current_working_directory(fs);
-    CL_ASSERT_NOT_NULL(cwd);
-    cl_log_info("Current working directory: %s", cwd->name);
+CL_TEST(test_directory_operations) {
+    char cwd[1024];
+    if (getcwd(cwd, sizeof(cwd)) == null) {
+        cl_log_error("Failed to get current working directory");
+        return;
+    }
+    cl_log_info("Current working directory: %s", cwd);
 
     char full_test_dir[1024];
-    snprintf(full_test_dir, sizeof(full_test_dir), "%s/%s", cwd->name, TEST_DIR);
+    snprintf(full_test_dir, sizeof(full_test_dir), "%s/%s", cwd, TEST_DIR);
 
     // Create directory
     bool result = cl_fs_create_directory(fs, full_test_dir);
-    if (!result)
-    {
+    if (!result) {
         cl_log_error("Failed to create directory: %s", cl_fs_get_last_error(fs));
     }
     CL_ASSERT(result);
 
     result = cl_fs_directory_exists(fs, full_test_dir);
-    if (!result)
-    {
+    if (!result) {
         cl_log_error("Directory does not exist after creation: %s", cl_fs_get_last_error(fs));
     }
     CL_ASSERT(result);
@@ -63,52 +60,45 @@ CL_TEST(test_directory_operations)
     char nested_dir[1024];
     snprintf(nested_dir, sizeof(nested_dir), "%s/nested", full_test_dir);
     result = cl_fs_create_directory(fs, nested_dir);
-    if (!result)
-    {
+    if (!result) {
         cl_log_error("Failed to create nested directory: %s", cl_fs_get_last_error(fs));
     }
     CL_ASSERT(result);
 
     result = cl_fs_directory_exists(fs, nested_dir);
-    if (!result)
-    {
+    if (!result) {
         cl_log_error("Nested directory does not exist after creation: %s", cl_fs_get_last_error(fs));
     }
     CL_ASSERT(result);
 
     // Remove nested directory
     result = cl_fs_remove_directory(fs, nested_dir);
-    if (!result)
-    {
+    if (!result) {
         cl_log_error("Failed to remove nested directory: %s", cl_fs_get_last_error(fs));
     }
     CL_ASSERT(result);
 
     result = cl_fs_directory_exists(fs, nested_dir);
-    if (result)
-    {
+    if (result) {
         cl_log_error("Nested directory still exists after removal");
     }
     CL_ASSERT(!result);
 
     // Remove main directory
     result = cl_fs_remove_directory(fs, full_test_dir);
-    if (!result)
-    {
+    if (!result) {
         cl_log_error("Failed to remove main directory: %s", cl_fs_get_last_error(fs));
     }
     CL_ASSERT(result);
 
     result = cl_fs_directory_exists(fs, full_test_dir);
-    if (result)
-    {
+    if (result) {
         cl_log_error("Main directory still exists after removal");
     }
     CL_ASSERT(!result);
 }
 
-CL_TEST(test_file_operations)
-{
+CL_TEST(test_file_operations) {
     // Write file
     cl_file_t *file = cl_fs_open_file(fs, TEST_FILE, CL_FILE_MODE_WRITE);
     CL_ASSERT_NOT_NULL(file);
@@ -147,8 +137,7 @@ CL_TEST(test_file_operations)
     CL_ASSERT(!cl_fs_file_exists(fs, TEST_FILE));
 }
 
-CL_TEST(test_file_seek_tell)
-{
+CL_TEST(test_file_seek_tell) {
     cl_file_t *file = cl_fs_open_file(fs, TEST_FILE, CL_FILE_MODE_WRITE);
     CL_ASSERT_NOT_NULL(file);
     cl_fs_write_file(file, TEST_FILE_CONTENT, strlen(TEST_FILE_CONTENT));
@@ -185,8 +174,7 @@ CL_TEST(test_file_seek_tell)
     cl_fs_remove_file(fs, TEST_FILE);
 }
 
-CL_TEST(test_rename_copy)
-{
+CL_TEST(test_rename_copy) {
     cl_file_t *file = cl_fs_open_file(fs, TEST_FILE, CL_FILE_MODE_WRITE);
     CL_ASSERT_NOT_NULL(file);
     cl_fs_write_file(file, TEST_FILE_CONTENT, strlen(TEST_FILE_CONTENT));
@@ -207,8 +195,7 @@ CL_TEST(test_rename_copy)
     cl_fs_remove_file(fs, copy_name);
 }
 
-CL_TEST(test_file_info)
-{
+CL_TEST(test_file_info) {
     cl_file_t *file = cl_fs_open_file(fs, TEST_FILE, CL_FILE_MODE_WRITE);
     CL_ASSERT_NOT_NULL(file);
     cl_fs_write_file(file, TEST_FILE_CONTENT, strlen(TEST_FILE_CONTENT));
@@ -227,13 +214,11 @@ CL_TEST(test_file_info)
     cl_fs_remove_file(fs, TEST_FILE);
 }
 
-CL_TEST(test_directory_listing)
-{
+CL_TEST(test_directory_listing) {
     cl_fs_create_directory(fs, TEST_DIR);
 
     const char *files[] = {"file1.txt", "file2.txt", "file3.txt"};
-    for (int i = 0; i < 3; i++)
-    {
+    for (int i = 0; i < 3; i++) {
         char path[256];
         snprintf(path, sizeof(path), "%s/%s", TEST_DIR, files[i]);
         cl_file_t *file = cl_fs_open_file(fs, path, CL_FILE_MODE_WRITE);
@@ -246,10 +231,8 @@ CL_TEST(test_directory_listing)
 
     int file_count = 0;
     cl_fs_dir_entry_t entry;
-    while (cl_fs_read_directory(iterator, &entry))
-    {
-        if (strcmp(entry.name, ".") == 0 || strcmp(entry.name, "..") == 0)
-        {
+    while (cl_fs_read_directory(iterator, &entry)) {
+        if (strcmp(entry.name, ".") == 0 || strcmp(entry.name, "..") == 0) {
             continue;
         }
         file_count++;
@@ -261,8 +244,7 @@ CL_TEST(test_directory_listing)
     cl_fs_close_directory(iterator);
     CL_ASSERT_EQUAL(file_count, 3);
 
-    for (int i = 0; i < 3; i++)
-    {
+    for (int i = 0; i < 3; i++) {
         char path[256];
         snprintf(path, sizeof(path), "%s/%s", TEST_DIR, files[i]);
         cl_fs_remove_file(fs, path);
@@ -270,8 +252,7 @@ CL_TEST(test_directory_listing)
     cl_fs_remove_directory(fs, TEST_DIR);
 }
 
-CL_TEST(test_large_file_operations)
-{
+CL_TEST(test_large_file_operations) {
     cl_file_t *file = cl_fs_open_file(fs, "large_file.bin", CL_FILE_MODE_WRITE);
     CL_ASSERT_NOT_NULL(file);
 
@@ -300,11 +281,10 @@ CL_TEST(test_large_file_operations)
     cl_mem_free(allocator, read_buffer);
 }
 
-CL_TEST(test_error_handling)
-{
+CL_TEST(test_error_handling) {
     // Test opening a non-existent file
     cl_file_t *file = cl_fs_open_file(fs, "non_existent_file.txt", CL_FILE_MODE_READ);
-    CL_ASSERT_NULL(file);
+    CL_ASSERT_null(file);
     CL_ASSERT_STRING_NOT_EQUAL(cl_fs_get_last_error(fs), "");
 
     // Test creating a directory with invalid characters
@@ -323,7 +303,7 @@ CL_TEST(test_error_handling)
     cl_fs_set_file_attributes(fs, readonly_file, CL_FILE_ATTRIBUTE_READONLY);
 
     file = cl_fs_open_file(fs, readonly_file, CL_FILE_MODE_WRITE);
-    CL_ASSERT_NULL(file);
+    CL_ASSERT_null(file);
     CL_ASSERT_STRING_NOT_EQUAL(cl_fs_get_last_error(fs), "");
 
     // Clean up
@@ -332,8 +312,7 @@ CL_TEST(test_error_handling)
     cl_fs_remove_directory(fs, TEST_DIR);
 }
 
-CL_TEST(test_file_attributes)
-{
+CL_TEST(test_file_attributes) {
     cl_file_t *file = cl_fs_open_file(fs, TEST_FILE, CL_FILE_MODE_WRITE);
     CL_ASSERT_NOT_NULL(file);
     cl_fs_write_file(file, TEST_FILE_CONTENT, strlen(TEST_FILE_CONTENT));
@@ -356,13 +335,16 @@ CL_TEST(test_file_attributes)
     cl_fs_remove_file(fs, TEST_FILE);
 }
 
-CL_TEST(test_path_normalization)
-{
-    const char *test_paths[] = {"./test/../folder/./file.txt", "folder//double_slash/file.txt", "../parent/file.txt",
-                                "/absolute/path/to/file.txt", "relative/path/to/file.txt"};
+CL_TEST(test_path_normalization) {
+    const char *test_paths[] = {
+        "./test/../folder/./file.txt",
+        "folder//double_slash/file.txt",
+        "../parent/file.txt",
+        "/absolute/path/to/file.txt",
+        "relative/path/to/file.txt"
+    };
 
-    for (int i = 0; i < 5; i++)
-    {
+    for (int i = 0; i < 5; i++) {
         char *normalized = cl_fs_normalize_path(fs, test_paths[i]);
         CL_ASSERT_NOT_NULL(normalized);
         cl_log_info("Original: %s", test_paths[i]);
@@ -383,20 +365,19 @@ CL_TEST(test_path_normalization)
 }
 
 CL_TEST_SUITE_BEGIN(FilesystemTests)
-CL_TEST_SUITE_TEST(test_directory_operations)
-CL_TEST_SUITE_TEST(test_file_operations)
-CL_TEST_SUITE_TEST(test_file_seek_tell)
-CL_TEST_SUITE_TEST(test_rename_copy)
-CL_TEST_SUITE_TEST(test_file_info)
-CL_TEST_SUITE_TEST(test_directory_listing)
-CL_TEST_SUITE_TEST(test_large_file_operations)
-CL_TEST_SUITE_TEST(test_error_handling)
-CL_TEST_SUITE_TEST(test_file_attributes)
-CL_TEST_SUITE_TEST(test_path_normalization)
+    CL_TEST_SUITE_TEST(test_directory_operations)
+    CL_TEST_SUITE_TEST(test_file_operations)
+    CL_TEST_SUITE_TEST(test_file_seek_tell)
+    CL_TEST_SUITE_TEST(test_rename_copy)
+    CL_TEST_SUITE_TEST(test_file_info)
+    CL_TEST_SUITE_TEST(test_directory_listing)
+    CL_TEST_SUITE_TEST(test_large_file_operations)
+    CL_TEST_SUITE_TEST(test_error_handling)
+    CL_TEST_SUITE_TEST(test_file_attributes)
+    CL_TEST_SUITE_TEST(test_path_normalization)
 CL_TEST_SUITE_END
 
-int main()
-{
+int main() {
     cl_log_init_default(CL_LOG_INFO);
 
     setup();

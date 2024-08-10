@@ -36,20 +36,20 @@ char *cl_fs_platform_normalize_path(cl_fs_t *fs, const char *path)
     char *normalized;
 
     MultiByteToWideChar(CP_UTF8, 0, path, -1, wide_path, MAX_PATH);
-    if (GetFullPathNameW(wide_path, MAX_PATH, full_path, NULL) == 0)
+    if (GetFullPathNameW(wide_path, MAX_PATH, full_path, null) == 0)
     {
         cl_fs_set_last_error(fs, "Failed to normalize path");
-        return NULL;
+        return null;
     }
 
     normalized = cl_mem_alloc(fs->allocator, MAX_PATH);
-    if (normalized == NULL)
+    if (normalized == null)
     {
         cl_fs_set_last_error(fs, "Failed to allocate memory for normalized path");
-        return NULL;
+        return null;
     }
 
-    WideCharToMultiByte(CP_UTF8, 0, full_path, -1, normalized, MAX_PATH, NULL, NULL);
+    WideCharToMultiByte(CP_UTF8, 0, full_path, -1, normalized, MAX_PATH, null, null);
     return normalized;
 }
 
@@ -57,10 +57,10 @@ char *cl_fs_platform_denormalize_path(cl_fs_t *fs, const char *normalized_path)
 {
     // For Windows, we'll just return a copy of the normalized path
     char *denormalized = cl_mem_alloc(fs->allocator, strlen(normalized_path) + 1);
-    if (denormalized == NULL)
+    if (denormalized == null)
     {
         cl_fs_set_last_error(fs, "Failed to allocate memory for denormalized path");
-        return NULL;
+        return null;
     }
     strcpy(denormalized, normalized_path);
     return denormalized;
@@ -95,19 +95,19 @@ cl_file_t *cl_fs_platform_open_file(cl_fs_t *fs, const char *path, cl_file_mode_
     WCHAR wide_path[MAX_PATH];
     MultiByteToWideChar(CP_UTF8, 0, path, -1, wide_path, MAX_PATH);
 
-    handle = CreateFileW(wide_path, access, FILE_SHARE_READ, NULL, creation, FILE_ATTRIBUTE_NORMAL, NULL);
+    handle = CreateFileW(wide_path, access, FILE_SHARE_READ, null, creation, FILE_ATTRIBUTE_NORMAL, null);
     if (handle == INVALID_HANDLE_VALUE)
     {
         cl_fs_set_last_error(fs, "Failed to open file");
-        return NULL;
+        return null;
     }
 
     cl_file_t *file = cl_mem_alloc(fs->allocator, sizeof(cl_file_t));
-    if (file == NULL)
+    if (file == null)
     {
         CloseHandle(handle);
         cl_fs_set_last_error(fs, "Failed to allocate memory for file handle");
-        return NULL;
+        return null;
     }
 
     file->fs = fs;
@@ -128,7 +128,7 @@ void cl_fs_platform_close_file(cl_file_t *file)
 u64 cl_fs_platform_read_file(cl_file_t *file, void *buffer, u64 size)
 {
     DWORD bytes_read;
-    if (!ReadFile(file->handle, buffer, (DWORD)size, &bytes_read, NULL))
+    if (!ReadFile(file->handle, buffer, (DWORD)size, &bytes_read, null))
     {
         cl_fs_set_last_error(file->fs, "Failed to read file");
         return 0;
@@ -139,7 +139,7 @@ u64 cl_fs_platform_read_file(cl_file_t *file, void *buffer, u64 size)
 u64 cl_fs_platform_write_file(cl_file_t *file, const void *buffer, u64 size)
 {
     DWORD bytes_written;
-    if (!WriteFile(file->handle, buffer, (DWORD)size, &bytes_written, NULL))
+    if (!WriteFile(file->handle, buffer, (DWORD)size, &bytes_written, null))
     {
         cl_fs_set_last_error(file->fs, "Failed to write file");
         return 0;
@@ -151,7 +151,7 @@ bool cl_fs_platform_seek_file(cl_file_t *file, i64 offset, i32 origin)
 {
     LARGE_INTEGER li;
     li.QuadPart = offset;
-    if (SetFilePointerEx(file->handle, li, NULL, origin) == 0)
+    if (SetFilePointerEx(file->handle, li, null, origin) == 0)
     {
         cl_fs_set_last_error(file->fs, "Failed to seek file");
         return false;
@@ -176,7 +176,7 @@ bool cl_fs_platform_create_directory(cl_fs_t *fs, const char *path)
     WCHAR wide_path[MAX_PATH];
     MultiByteToWideChar(CP_UTF8, 0, path, -1, wide_path, MAX_PATH);
 
-    if (!CreateDirectoryW(wide_path, NULL))
+    if (!CreateDirectoryW(wide_path, null))
     {
         cl_fs_set_last_error(fs, "Failed to create directory");
         return false;
@@ -304,20 +304,20 @@ bool cl_fs_platform_get_file_time(cl_fs_t *fs, const char *path, u64 *creation_t
 cl_fs_dir_iterator_t *cl_fs_platform_open_directory(cl_fs_t *fs, const char *path)
 {
     cl_fs_dir_iterator_t *iterator = cl_mem_alloc(fs->allocator, sizeof(cl_fs_dir_iterator_t));
-    if (iterator == NULL)
+    if (iterator == null)
     {
         cl_fs_set_last_error(fs, "Failed to allocate memory for directory iterator");
-        return NULL;
+        return null;
     }
 
     iterator->fs = fs;
-    iterator->handle = NULL;
+    iterator->handle = null;
     iterator->path = cl_mem_alloc(fs->allocator, strlen(path) + 3); // +3 for "\*" and null terminator
-    if (iterator->path == NULL)
+    if (iterator->path == null)
     {
         cl_mem_free(fs->allocator, iterator);
         cl_fs_set_last_error(fs, "Failed to allocate memory for directory path");
-        return NULL;
+        return null;
     }
 
     sprintf(iterator->path, "%s\\*", path);
@@ -364,7 +364,7 @@ bool cl_fs_platform_read_directory(cl_fs_dir_iterator_t *iterator, cl_fs_dir_ent
 {
     WIN32_FIND_DATAW find_data;
 
-    if (iterator->handle == NULL)
+    if (iterator->handle == null)
     {
         WCHAR wide_path[MAX_PATH];
         MultiByteToWideChar(CP_UTF8, 0, iterator->path, -1, wide_path, MAX_PATH);
@@ -387,7 +387,7 @@ bool cl_fs_platform_read_directory(cl_fs_dir_iterator_t *iterator, cl_fs_dir_ent
     }
 
     static char entry_name[MAX_PATH];
-    WideCharToMultiByte(CP_UTF8, 0, find_data.cFileName, -1, entry_name, MAX_PATH, NULL, NULL);
+    WideCharToMultiByte(CP_UTF8, 0, find_data.cFileName, -1, entry_name, MAX_PATH, null, null);
     entry->name = entry_name;
     entry->is_directory = (find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
     entry->size = ((i64)find_data.nFileSizeHigh << 32) | find_data.nFileSizeLow;
@@ -401,7 +401,7 @@ void cl_fs_platform_close_directory(cl_fs_dir_iterator_t *iterator)
 {
     if (iterator)
     {
-        if (iterator->handle != NULL && iterator->handle != INVALID_HANDLE_VALUE)
+        if (iterator->handle != null && iterator->handle != INVALID_HANDLE_VALUE)
         {
             FindClose(iterator->handle);
         }
@@ -470,8 +470,8 @@ static void set_last_error_from_windows(cl_fs_t *fs)
 {
     DWORD error_code = GetLastError();
     LPVOID error_msg;
-    FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL,
-                  error_code, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&error_msg, 0, NULL);
+    FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, null,
+                  error_code, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&error_msg, 0, null);
 
     cl_fs_set_last_error(fs, (const char *)error_msg);
     LocalFree(error_msg);
@@ -511,7 +511,7 @@ bool cl_fs_win_get_current_directory(cl_fs_t *fs, char *buffer, size_t size)
         return false;
     }
 
-    WideCharToMultiByte(CP_UTF8, 0, wide_buffer, -1, buffer, (int)size, NULL, NULL);
+    WideCharToMultiByte(CP_UTF8, 0, wide_buffer, -1, buffer, (int)size, null, null);
     convert_path_separators(buffer);
     return true;
 }
@@ -538,7 +538,7 @@ bool cl_fs_win_get_temp_path(cl_fs_t *fs, char *buffer, size_t size)
         return false;
     }
 
-    WideCharToMultiByte(CP_UTF8, 0, wide_buffer, -1, buffer, (int)size, NULL, NULL);
+    WideCharToMultiByte(CP_UTF8, 0, wide_buffer, -1, buffer, (int)size, null, null);
     convert_path_separators(buffer);
     return true;
 }
@@ -550,7 +550,7 @@ bool cl_fs_win_create_hard_link(cl_fs_t *fs, const char *existing_file, const ch
     MultiByteToWideChar(CP_UTF8, 0, existing_file, -1, wide_existing_file, MAX_PATH);
     MultiByteToWideChar(CP_UTF8, 0, new_file, -1, wide_new_file, MAX_PATH);
 
-    if (!CreateHardLinkW(wide_new_file, wide_existing_file, NULL))
+    if (!CreateHardLinkW(wide_new_file, wide_existing_file, null))
     {
         set_last_error_from_windows(fs);
         return false;

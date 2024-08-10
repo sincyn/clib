@@ -17,8 +17,6 @@ typedef void *(*cl_realloc_func)(void *ptr, u64 new_size, void *user_data);
 typedef void (*cl_free_func)(void *ptr, void *user_data);
 
 // Allocator structure
-
-
 typedef enum cl_allocator_type
 {
     CL_ALLOCATOR_TYPE_PLATFORM, // malloc, heapalloc, etc
@@ -70,6 +68,10 @@ typedef struct cl_allocator_config
             u64 block_count;
             void *free_list;
         } free_list;
+        struct
+        {
+            u64 size;
+        } arena;
         struct
         {
             cl_allocator_t *allocator;

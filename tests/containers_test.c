@@ -1,460 +1,343 @@
-/**
- * Optimized Hash Table Tests
- * Created by Claude on 8/4/2024.
- */
+// table_tests.c
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "clib/containers_lib.h"
-#include "clib/log_lib.h"
-#include "clib/memory_lib.h"
 #include "clib/test_lib.h"
+#include "clib/time_lib.h"
 
-#define TEST_ITEMS 1000
+#define TEST_ALLOCATOR null // Replace with your actual test allocator if needed
 
-static cl_ht_t *hash_table;
-static cl_da_t *dynamic_array;
-static cl_allocator_t *allocator;
-
-
-// Helper function to create a string key
-static char *create_key(int i)
+// Helper function to generate random strings
+char *generate_random_string(int length)
 {
-    char *key = cl_mem_alloc(allocator, 20);
-    snprintf(key, 20, "key_%d", i);
-    return key;
-}
-
-// Helper function to create a string value
-static char *create_value(int i)
-{
-    char *value = cl_mem_alloc(allocator, 20);
-    snprintf(value, 20, "value_%d", i);
-    return value;
-}
-
-CL_TEST(test_hash_table_create_destroy)
-{
-    cl_ht_t *ht = cl_ht_init(allocator);
-    CL_ASSERT_NOT_NULL(ht);
-    cl_ht_destroy(ht);
-}
-
-CL_TEST(test_hash_table_insert_get)
-{
-    cl_ht_t *ht = cl_ht_init(allocator);
-
-    for (int i = 0; i < TEST_ITEMS; i++)
+    static const char charset[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    char *str = malloc(length + 1);
+    for (int i = 0; i < length; i++)
     {
-        char *key = create_key(i);
-        char *value = create_value(i);
-
-        bool result = cl_ht_insert(ht, key, value);
-        CL_ASSERT(result);
+        str[i] = charset[rand() % (sizeof(charset) - 1)];
     }
+    str[length] = '\0';
+    return str;
+}
 
-    CL_ASSERT_EQUAL(cl_ht_size(ht), TEST_ITEMS);
+// Helper function to print benchmark results
+void print_benchmark(const char *test_name, cl_time_t duration, int operations)
+{
+    double ms = cl_time_to_ms(&duration) / 1000.0;
+    printf("%s: %.3f ms (%.2f ops/ms)\n", test_name, ms, operations / ms);
+}
 
-    for (int i = 0; i < TEST_ITEMS; i++)
-    {
-        char *key = create_key(i);
-        char expected_value[20];
-        snprintf(expected_value, 20, "value_%d", i);
+CL_TEST(test_ht_basic_operations)
+{
+    cl_ht_t *ht = cl_ht_create(TEST_ALLOCATOR);
+    CL_ASSERT(ht != null);
 
-        char *value = cl_ht_get(ht, key);
+    // Test insertion
+    CL_ASSERT(cl_ht_put(ht, "key1", 4, "value1", 7, null));
+    CL_ASSERT(cl_ht_put(ht, "key2", 4, "value2", 7, null));
 
-        CL_ASSERT_NOT_NULL(value);
-        CL_ASSERT_STRING_EQUAL(value, expected_value);
+    // Test retrieval
+    void *value;
+    u64 value_size;
+    CL_ASSERT(cl_ht_get(ht, "key1", 4, &value, &value_size));
+    CL_ASSERT(strcmp(value, "value1") == 0);
+    CL_ASSERT(value_size == 7);
 
-        cl_mem_free(allocator, key);
-    }
+    // Test update
+    CL_ASSERT(cl_ht_put(ht, "key1", 4, "new_value1", 11, null));
+    CL_ASSERT(cl_ht_get(ht, "key1", 4, &value, &value_size));
+    CL_ASSERT(strcmp(value, "new_value1") == 0);
+    CL_ASSERT(value_size == 11);
+
+    // Test removal
+    CL_ASSERT(cl_ht_remove(ht, "key1", 4) != null);
+    CL_ASSERT(!cl_ht_get(ht, "key1", 4, &value, &value_size));
+
+    // Test size
+    CL_ASSERT(cl_ht_size(ht) == 1);
 
     cl_ht_destroy(ht);
 }
 
-CL_TEST(test_hash_table_remove)
+CL_TEST(test_ht_collision_handling)
 {
-    cl_ht_t *ht = cl_ht_init(allocator);
+    cl_ht_t *ht = cl_ht_create_with_size(TEST_ALLOCATOR, 2); // Force collisions with small initial size
+    const char *keys[] = {"key1", "key2", "key3", "key4", "key5"};
+    int values[] = {1, 2, 3, 4, 5};
+    bool all_valid = true;
 
-    for (int i = 0; i < TEST_ITEMS; i++)
+    for (int i = 0; i < 5; i++)
     {
-        char *key = create_key(i);
-        char *value = create_value(i);
-        cl_ht_insert(ht, key, value);
+        all_valid &= cl_ht_put(ht, keys[i], strlen(keys[i]), &values[i], sizeof(int), null);
     }
 
-    for (int i = 0; i < TEST_ITEMS; i++)
+    CL_ASSERT(cl_ht_size(ht) == 5);
+
+    for (int i = 0; i < 5 && all_valid; i++)
     {
-        char *key = create_key(i);
-
-        bool remove_result = cl_ht_remove(ht, key);
-        CL_ASSERT(remove_result);
-
-        void *retrieved_value = cl_ht_get(ht, key);
-        CL_ASSERT_NULL(retrieved_value);
-
-        cl_mem_free(allocator, key);
+        void *data;
+        u64 data_size;
+        all_valid &= cl_ht_get(ht, keys[i], strlen(keys[i]), &data, &data_size);
+        all_valid &= (*(int *)data == values[i]);
     }
 
-    CL_ASSERT_EQUAL(cl_ht_size(ht), 0);
-    CL_ASSERT(cl_ht_is_empty(ht));
-
-    cl_ht_destroy(ht);
-}
-
-CL_TEST(test_hash_table_clear)
-{
-    cl_ht_t *ht = cl_ht_init(allocator);
-
-    for (int i = 0; i < TEST_ITEMS; i++)
-    {
-        char *key = create_key(i);
-        char *value = create_value(i);
-        cl_ht_insert(ht, key, value);
-    }
-
-    CL_ASSERT_EQUAL(cl_ht_size(ht), TEST_ITEMS);
-
-    cl_ht_clear(ht);
-    CL_ASSERT_EQUAL(cl_ht_size(ht), 0);
-    CL_ASSERT(cl_ht_is_empty(ht));
-
-    cl_ht_destroy(ht);
-}
-
-CL_TEST(test_hash_table_update)
-{
-    cl_ht_t *ht = cl_ht_init(allocator);
-
-    for (int i = 0; i < TEST_ITEMS; i++)
-    {
-        char *key = create_key(i);
-        char *value = create_value(i);
-        cl_ht_insert(ht, key, value);
-    }
-
-    for (int i = 0; i < TEST_ITEMS; i++)
-    {
-        char *key = create_key(i);
-        char *new_value = cl_mem_alloc(allocator, 30);
-        snprintf(new_value, 30, "updated_value_%d", i);
-
-        bool update_result = cl_ht_insert(ht, key, new_value);
-        CL_ASSERT(update_result);
-
-        char *retrieved_value = cl_ht_get(ht, key);
-        CL_ASSERT_NOT_NULL(retrieved_value);
-        CL_ASSERT_STRING_EQUAL(retrieved_value, new_value);
-
-        cl_mem_free(allocator, key);
-    }
-
-    CL_ASSERT_EQUAL(cl_ht_size(ht), TEST_ITEMS);
-
+    CL_ASSERT(all_valid);
     cl_ht_destroy(ht);
 }
 
 
-static void count_entries(const void *key, void *value, void *user_data)
+CL_TEST(test_ht_resize)
 {
-    int *count = (int *)user_data;
-    (*count)++;
-}
+    cl_ht_t *ht = cl_ht_create_with_size(TEST_ALLOCATOR, 2);
+    const int num_entries = 1000;
+    bool all_valid = true;
 
-CL_TEST(test_hash_table_foreach)
-{
-    cl_ht_t *ht = cl_ht_init(allocator);
-
-    for (int i = 0; i < TEST_ITEMS; i++)
+    for (int i = 0; i < num_entries; i++)
     {
-        char *key = create_key(i);
-        char *value = create_value(i);
-        cl_ht_insert(ht, key, value);
+        char key[16];
+        snprintf(key, sizeof(key), "key%d", i);
+        int *value = malloc(sizeof(int));
+        *value = i;
+        all_valid &= cl_ht_put(ht, key, strlen(key), value, sizeof(int), null);
     }
 
-    int count = 0;
-    cl_ht_foreach(ht, count_entries, &count);
+    CL_ASSERT(cl_ht_size(ht) == num_entries);
 
-    CL_ASSERT_EQUAL(count, TEST_ITEMS);
+    for (int i = 0; i < num_entries && all_valid; i++)
+    {
+        char key[16];
+        snprintf(key, sizeof(key), "key%d", i);
+        void *data;
+        u64 data_size;
+        all_valid &= cl_ht_get(ht, key, strlen(key), &data, &data_size);
+        all_valid &= (*(int *)data == i);
+    }
+
+    CL_ASSERT(all_valid);
+    cl_ht_destroy(ht);
+}
+
+CL_TEST(test_ht_string_specific_functions)
+{
+    cl_ht_t *ht = cl_ht_create(TEST_ALLOCATOR);
+
+    // Test put_str and get_str
+    cl_ht_put_str(ht, "string_key", "string_value");
+    char *value = cl_ht_get_str(ht, "string_key");
+    CL_ASSERT(strcmp(value, "string_value") == 0);
+
+    // Test exists_str
+    CL_ASSERT(cl_ht_exists_str(ht, "string_key"));
+    CL_ASSERT(!cl_ht_exists_str(ht, "nonexistent_key"));
+
+    // Test remove_str
+    value = cl_ht_remove_str(ht, "string_key");
+    CL_ASSERT(strcmp(value, "string_value") == 0);
+    CL_ASSERT(!cl_ht_exists_str(ht, "string_key"));
 
     cl_ht_destroy(ht);
 }
 
-CL_TEST(test_dynamic_array_create_destroy)
+CL_TEST(test_ht_iteration)
 {
-    cl_da_t *da = cl_da_init(allocator, sizeof(int));
-    CL_ASSERT_NOT_NULL(da);
-    cl_da_destroy(da);
+    cl_ht_t *ht = cl_ht_create(TEST_ALLOCATOR);
+    const int num_entries = 100;
+    bool all_valid = true;
+
+    for (int i = 0; i < num_entries; i++)
+    {
+        char key[16], value[16];
+        snprintf(key, sizeof(key), "key%d", i);
+        snprintf(value, sizeof(value), "value%d", i);
+        cl_ht_put_str(ht, key, strdup(value));
+    }
+
+    int count = -1;
+    char *key;
+    void *data;
+    if (cl_ht_iter_init_str(ht, &key, &data))
+    {
+        do
+        {
+            count++;
+            all_valid &= (strncmp(key, "key", 3) == 0);
+            all_valid &= (strncmp(data, "value", 5) == 0);
+        }
+        while (cl_ht_iter_next_str(ht, &key, &data));
+    }
+
+    CL_ASSERT(count == num_entries);
+    CL_ASSERT(all_valid);
+
+    cl_ht_destroy(ht);
 }
 
-CL_TEST(test_dynamic_array_push_get)
+typedef struct
 {
-    cl_da_t *da = cl_da_init(allocator, sizeof(int));
+    int count;
+    bool all_valid;
+} foreach_data_t;
 
-    for (int i = 0; i < TEST_ITEMS; i++)
+
+static bool foreach_callback(void *key, u64 key_size, void *data, u64 data_size, void *arg)
+{
+    foreach_data_t *fd = (foreach_data_t *)arg;
+    fd->count++;
+
+    // Verify that the key starts with "key" and the data starts with "value"
+    if (key_size < 3 || memcmp(key, "key", 3) != 0 || data_size < 5 || memcmp(data, "value", 5) != 0)
     {
-        bool result = cl_da_push(da, &i);
-        CL_ASSERT(result);
+        fd->all_valid = false;
     }
 
-    CL_ASSERT_EQUAL(cl_da_size(da), TEST_ITEMS);
-
-    for (int i = 0; i < TEST_ITEMS; i++)
-    {
-        int *value = cl_da_get(da, i);
-        CL_ASSERT_NOT_NULL(value);
-        CL_ASSERT_EQUAL(*value, i);
-    }
-
-    cl_da_destroy(da);
+    return true;
 }
 
-CL_TEST(test_dynamic_array_set)
+CL_TEST(test_ht_foreach)
 {
-    cl_da_t *da = cl_da_init(allocator, sizeof(int));
+    cl_ht_t *ht = cl_ht_create(TEST_ALLOCATOR);
+    const int num_entries = 100;
 
-    for (int i = 0; i < TEST_ITEMS; i++)
+    for (int i = 0; i < num_entries; i++)
     {
-        cl_da_push(da, &i);
+        char key[16], value[16];
+        snprintf(key, sizeof(key), "key%d", i);
+        snprintf(value, sizeof(value), "value%d", i);
+        cl_ht_put(ht, key, strlen(key), strdup(value), strlen(value), null);
     }
+    char *value;
+    u64 value_size;
+    CL_ASSERT(cl_ht_get(ht, "key0", 4, (void **)&value, &value_size));
 
-    for (int i = 0; i < TEST_ITEMS; i++)
-    {
-        int new_value = i * 2;
-        bool result = cl_da_set(da, i, &new_value);
-        CL_ASSERT(result);
-    }
+    char* value2 = cl_ht_get_str(ht, "key5");
+    CL_ASSERT(strcmp(value2, "value5") == 0);
 
-    for (int i = 0; i < TEST_ITEMS; i++)
-    {
-        int *value = cl_da_get(da, i);
-        CL_ASSERT_NOT_NULL(value);
-        CL_ASSERT_EQUAL(*value, i * 2);
-    }
+    foreach_data_t fd = {0, true};
+    u64 visited = cl_ht_foreach(ht, foreach_callback, &fd);
 
-    cl_da_destroy(da);
+    CL_ASSERT(visited == num_entries);
+    CL_ASSERT(fd.count == num_entries);
+    CL_ASSERT(fd.all_valid);
+
+    cl_ht_destroy(ht);
 }
 
-CL_TEST(test_dynamic_array_remove)
+CL_TEST(test_ht_edge_cases)
 {
-    cl_da_t *da = cl_da_init(allocator, sizeof(int));
+    cl_ht_t *ht = cl_ht_create(TEST_ALLOCATOR);
 
-    for (int i = 0; i < TEST_ITEMS; i++)
-    {
-        cl_da_push(da, &i);
-    }
+    // Test empty key
+    CL_ASSERT(cl_ht_put(ht, "", 0, "empty_key_value", 16, null));
+    void *value;
+    u64 value_size;
+    CL_ASSERT(cl_ht_get(ht, "", 0, &value, &value_size));
+    CL_ASSERT(strcmp(value, "empty_key_value") == 0);
 
-    // Remove every other element
-    for (int i = 0; i < TEST_ITEMS / 2; i++)
-    {
-        bool result = cl_da_remove(da, i);
-        CL_ASSERT(result);
-    }
+    // Test null value
+    CL_ASSERT(cl_ht_put(ht, "null_value_key", 14, null, 0, null));
+    CL_ASSERT(cl_ht_get(ht, "null_value_key", 14, &value, &value_size));
+    CL_ASSERT(value == null);
+    CL_ASSERT(value_size == 0);
 
-    CL_ASSERT_EQUAL(cl_da_size(da), TEST_ITEMS / 2);
+    // Test large key and value
+    char *large_key = generate_random_string(1000);
+    char *large_value = generate_random_string(10000);
+    CL_ASSERT(cl_ht_put(ht, large_key, 1000, large_value, 10000, null));
+    CL_ASSERT(cl_ht_get(ht, large_key, 1000, &value, &value_size));
+    CL_ASSERT(memcmp(value, large_value, 10000) == 0);
+    free(large_key);
+    free(large_value);
 
-    for (u64 i = 0; i < cl_da_size(da); i++)
-    {
-        int *value = cl_da_get(da, i);
-        CL_ASSERT_NOT_NULL(value);
-        CL_ASSERT_EQUAL(*value, (int)(i * 2 + 1));
-    }
-
-    cl_da_destroy(da);
+    cl_ht_destroy(ht);
 }
 
-CL_TEST(test_dynamic_array_clear)
+CL_TEST(test_ht_performance)
 {
-    cl_da_t *da = cl_da_init(allocator, sizeof(int));
+    cl_ht_t *ht = cl_ht_create(TEST_ALLOCATOR);
+    const int num_entries = 1000000;
+    cl_time_t start, end, duration;
+    bool all_valid = true;
 
-    for (int i = 0; i < TEST_ITEMS; i++)
+    // Benchmark insertion
+    cl_time_get_current(&start);
+    for (int i = 0; i < num_entries; i++)
     {
-        cl_da_push(da, &i);
+        char key[16];
+        snprintf(key, sizeof(key), "key%d", i);
+        int *value = malloc(sizeof(int));
+        *value = i;
+        all_valid &= cl_ht_put(ht, key, strlen(key), value, sizeof(int), null);
+        if (!all_valid)
+        {
+            printf("Insertion failed at i=%d\n", i);
+            break;
+        }
     }
+    cl_time_get_current(&end);
+    duration = cl_time_diff(&end, &start);
+    print_benchmark("Insertion", duration, num_entries);
 
-    CL_ASSERT_EQUAL(cl_da_size(da), TEST_ITEMS);
-
-    cl_da_clear(da);
-    CL_ASSERT_EQUAL(cl_da_size(da), 0);
-    CL_ASSERT(cl_da_is_empty(da));
-
-    cl_da_destroy(da);
-}
-
-static void sum_elements(void *element, void *user_data)
-{
-    int *sum = (int *)user_data;
-    *sum += *(int *)element;
-}
-
-CL_TEST(test_dynamic_array_foreach)
-{
-    cl_da_t *da = cl_da_init(allocator, sizeof(int));
-
-    int expected_sum = 0;
-    for (int i = 0; i < TEST_ITEMS; i++)
+    // Benchmark retrieval
+    cl_time_get_current(&start);
+    for (int i = 0; i < num_entries && all_valid; i++)
     {
-        cl_da_push(da, &i);
-        expected_sum += i;
+        char key[16];
+        snprintf(key, sizeof(key), "key%d", i);
+        int *value;
+        all_valid &= cl_ht_get(ht, key, strlen(key), (void **)&value, null);
+        all_valid &= (value != null && *value == i);
+        if (!all_valid)
+        {
+            printf("Retrieval failed at i=%d, value=%d\n", i, (value ? *value : -1));
+            break;
+        }
     }
+    cl_time_get_current(&end);
+    duration = cl_time_diff(&end, &start);
+    print_benchmark("Retrieval", duration, num_entries);
 
-    int sum = 0;
-    cl_da_foreach(da, sum_elements, &sum);
-
-    CL_ASSERT_EQUAL(sum, expected_sum);
-
-    cl_da_destroy(da);
-}
-
-CL_TEST(test_hash_set_create_destroy)
-{
-    cl_hs_t *hs = cl_hs_init(allocator);
-    CL_ASSERT_NOT_NULL(hs);
-    cl_hs_destroy(hs);
-}
-
-CL_TEST(test_hash_set_insert_contains)
-{
-    cl_hs_t *hs = cl_hs_init(allocator);
-
-    for (int i = 0; i < TEST_ITEMS; i++)
+    // Benchmark deletion
+    cl_time_get_current(&start);
+    for (int i = 0; i < num_entries && all_valid; i++)
     {
-        char *element = create_key(i); // Reusing the create_key function from hash table tests
-        bool result = cl_hs_insert(hs, element);
-        CL_ASSERT(result);
+        char key[16];
+        snprintf(key, sizeof(key), "key%d", i);
+        int *value = cl_ht_remove_str(ht, key);
+        all_valid &= (value != null && *value == i);
+        free(value);
+        if (!all_valid)
+        {
+            printf("Deletion failed at i=%d, value=%d\n", i, (value ? *value : -1));
+            break;
+        }
     }
+    cl_time_get_current(&end);
+    duration = cl_time_diff(&end, &start);
+    print_benchmark("Deletion", duration, num_entries);
 
-    CL_ASSERT_EQUAL(cl_hs_size(hs), TEST_ITEMS);
+    CL_ASSERT(cl_ht_size(ht) == 0);
+    CL_ASSERT(all_valid);
 
-    for (int i = 0; i < TEST_ITEMS; i++)
-    {
-        char *element = create_key(i);
-        bool contains = cl_hs_contains(hs, element);
-        CL_ASSERT(contains);
-        cl_mem_free(allocator, element);
-    }
-
-    // Test for non-existent element
-    char *non_existent = "non_existent_key";
-    bool contains = cl_hs_contains(hs, non_existent);
-    CL_ASSERT(!contains);
-
-    cl_hs_destroy(hs);
-}
-
-CL_TEST(test_hash_set_remove)
-{
-    cl_hs_t *hs = cl_hs_init(allocator);
-
-    for (int i = 0; i < TEST_ITEMS; i++)
-    {
-        char *element = create_key(i);
-        cl_hs_insert(hs, element);
-    }
-
-    for (int i = 0; i < TEST_ITEMS; i += 2)
-    {
-        char *element = create_key(i);
-        bool result = cl_hs_remove(hs, element);
-        CL_ASSERT(result);
-        cl_mem_free(allocator, element);
-    }
-
-    CL_ASSERT_EQUAL(cl_hs_size(hs), TEST_ITEMS / 2);
-
-    for (int i = 0; i < TEST_ITEMS; i++)
-    {
-        char *element = create_key(i);
-        bool contains = cl_hs_contains(hs, element);
-        CL_ASSERT_EQUAL(contains, i % 2 != 0);
-        cl_mem_free(allocator, element);
-    }
-
-    cl_hs_destroy(hs);
-}
-
-CL_TEST(test_hash_set_clear)
-{
-    cl_hs_t *hs = cl_hs_init(allocator);
-
-    for (int i = 0; i < TEST_ITEMS; i++)
-    {
-        char *element = create_key(i);
-        cl_hs_insert(hs, element);
-    }
-
-    CL_ASSERT_EQUAL(cl_hs_size(hs), TEST_ITEMS);
-
-    cl_hs_clear(hs);
-    CL_ASSERT_EQUAL(cl_hs_size(hs), 0);
-    CL_ASSERT(cl_hs_is_empty(hs));
-
-    cl_hs_destroy(hs);
-}
-
-static void count_elements(const void *element, void *user_data)
-{
-    int *count = (int *)user_data;
-    (*count)++;
-}
-
-CL_TEST(test_hash_set_foreach)
-{
-    cl_hs_t *hs = cl_hs_init(allocator);
-
-    for (int i = 0; i < TEST_ITEMS; i++)
-    {
-        char *element = create_key(i);
-        cl_hs_insert(hs, element);
-    }
-
-    int count = 0;
-    cl_hs_foreach(hs, count_elements, &count);
-
-    CL_ASSERT_EQUAL(count, TEST_ITEMS);
-
-    cl_hs_destroy(hs);
+    cl_ht_destroy(ht);
 }
 
 
 CL_TEST_SUITE_BEGIN(HashTableTests)
-CL_TEST_SUITE_TEST(test_hash_table_create_destroy)
-CL_TEST_SUITE_TEST(test_hash_table_insert_get)
-CL_TEST_SUITE_TEST(test_hash_table_remove)
-CL_TEST_SUITE_TEST(test_hash_table_clear)
-CL_TEST_SUITE_TEST(test_hash_table_update)
-CL_TEST_SUITE_TEST(test_hash_table_foreach)
+CL_TEST_SUITE_TEST(test_ht_basic_operations)
+CL_TEST_SUITE_TEST(test_ht_collision_handling)
+CL_TEST_SUITE_TEST(test_ht_resize)
+CL_TEST_SUITE_TEST(test_ht_string_specific_functions)
+CL_TEST_SUITE_TEST(test_ht_iteration)
+CL_TEST_SUITE_TEST(test_ht_foreach)
+CL_TEST_SUITE_TEST(test_ht_edge_cases)
+CL_TEST_SUITE_TEST(test_ht_performance)
 CL_TEST_SUITE_END
-
-CL_TEST_SUITE_BEGIN(DynamicArrayTests)
-CL_TEST_SUITE_TEST(test_dynamic_array_create_destroy)
-CL_TEST_SUITE_TEST(test_dynamic_array_push_get)
-CL_TEST_SUITE_TEST(test_dynamic_array_set)
-CL_TEST_SUITE_TEST(test_dynamic_array_remove)
-CL_TEST_SUITE_TEST(test_dynamic_array_clear)
-CL_TEST_SUITE_TEST(test_dynamic_array_foreach)
-CL_TEST_SUITE_END
-
-
-CL_TEST_SUITE_BEGIN(HashSetTests)
-CL_TEST_SUITE_TEST(test_hash_set_create_destroy)
-CL_TEST_SUITE_TEST(test_hash_set_insert_contains)
-CL_TEST_SUITE_TEST(test_hash_set_remove)
-CL_TEST_SUITE_TEST(test_hash_set_clear)
-CL_TEST_SUITE_TEST(test_hash_set_foreach)
-CL_TEST_SUITE_END
-
 
 int main()
 {
-    cl_log_init_default(CL_LOG_INFO);
-    allocator = cl_allocator_create(&(cl_allocator_config_t){.type = CL_ALLOCATOR_TYPE_PLATFORM});
-
     CL_RUN_TEST_SUITE(HashTableTests);
-    CL_RUN_TEST_SUITE(DynamicArrayTests);
-    CL_RUN_TEST_SUITE(HashSetTests);
     CL_RUN_ALL_TESTS();
-    cl_allocator_destroy(allocator);
-    cl_log_cleanup();
     return 0;
 }

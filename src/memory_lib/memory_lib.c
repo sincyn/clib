@@ -8,12 +8,12 @@
 
 cl_allocator_t *cl_allocator_create(const cl_allocator_config_t *config)
 {
-    if (config == NULL)
-        return NULL;
+    if (config == null)
+        return null;
 
     cl_allocator_t *allocator = malloc(sizeof(cl_allocator_t));
-    if (allocator == NULL)
-        return NULL;
+    if (allocator == null)
+        return null;
 
     switch (config->type)
     {
@@ -21,14 +21,19 @@ cl_allocator_t *cl_allocator_create(const cl_allocator_config_t *config)
         if (!init_platform_allocator(allocator, config))
         {
             free(allocator);
-            return NULL;
+            return null;
         }
         break;
-    // Initialize other allocator types here
-    // ...
+    case CL_ALLOCATOR_TYPE_ARENA:
+        if (!init_arena_allocator(allocator, config))
+        {
+            free(allocator);
+            return null;
+        }
+        break;
     default:
         free(allocator);
-        return NULL;
+        return null;
     }
 
     return allocator;
@@ -36,13 +41,15 @@ cl_allocator_t *cl_allocator_create(const cl_allocator_config_t *config)
 
 void cl_allocator_destroy(cl_allocator_t *allocator)
 {
-    if (allocator == NULL)
+    if (allocator == null)
         return;
     switch (allocator->type)
     {
     case CL_ALLOCATOR_TYPE_PLATFORM:
         deinit_platform_allocator(allocator);
         break;
+    case CL_ALLOCATOR_TYPE_ARENA:
+        deinit_arena_allocator(allocator);
     default:
         break;
     }
@@ -52,21 +59,21 @@ void cl_allocator_destroy(cl_allocator_t *allocator)
 
 void *cl_mem_alloc(const cl_allocator_t *allocator, const u64 size)
 {
-    if (allocator == NULL || allocator->alloc == NULL)
+    if (allocator == null || allocator->alloc == null)
         return malloc(size);
     return allocator->alloc(size, allocator->user_data);
 }
 
 void *cl_mem_realloc(const cl_allocator_t *allocator, void *ptr, const u64 new_size)
 {
-    if (allocator == NULL || allocator->realloc == NULL)
+    if (allocator == null || allocator->realloc == null)
         return realloc(ptr, new_size);
     return allocator->realloc(ptr, new_size, allocator->user_data);
 }
 
 void cl_mem_free(const cl_allocator_t *allocator, void *ptr)
 {
-    if (allocator == NULL || allocator->free == NULL)
+    if (allocator == null || allocator->free == null)
         return free(ptr);
     allocator->free(ptr, allocator->user_data);
 }
@@ -76,30 +83,30 @@ void *cl_mem_aligned_alloc(cl_allocator_t *allocator, u64 alignment, u64 size)
     // The alignment must be a power of 2
     // The size must be a multiple of the alignment
 
-    if (allocator == NULL || allocator->alloc == NULL)
-        return NULL;
+    if (allocator == null || allocator->alloc == null)
+        return null;
 
     if (alignment == 0 || (alignment & (alignment - 1)) != 0)
-        return NULL;
+        return null;
 
     if (size % alignment != 0)
-        return NULL;
+        return null;
 
     // Allocate memory with extra space for alignment
     u64 total_size = size + alignment;
     void *ptr = allocator->alloc(total_size, allocator->user_data);
-    if (ptr == NULL)
-        return NULL;
+    if (ptr == null)
+        return null;
 
         // Calculate the aligned memory address
 #ifdef _WIN32
     void *aligned_ptr = (void *)(((uintptr_t)ptr + alignment - 1) & ~(alignment - 1));
 #else
-    void *aligned_ptr = NULL;
+    void *aligned_ptr = null;
     if (posix_memalign(&aligned_ptr, alignment, size) != 0)
     {
         allocator->free(ptr, allocator->user_data);
-        return NULL;
+        return null;
     }
 #endif
 
@@ -112,10 +119,10 @@ void *cl_mem_aligned_alloc(cl_allocator_t *allocator, u64 alignment, u64 size)
 
 void cl_mem_aligned_free(const cl_allocator_t *allocator, void *ptr)
 {
-    if (allocator == NULL || allocator->free == NULL)
+    if (allocator == null || allocator->free == null)
         return;
 
-    if (ptr == NULL)
+    if (ptr == null)
         return;
 
     // Retrieve the original pointer before the aligned address

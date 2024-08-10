@@ -34,14 +34,14 @@ void cl_fs_platform_cleanup(cl_fs_t *fs)
 char *cl_fs_platform_normalize_path(cl_fs_t *fs, const char *path)
 {
     char *normalized = cl_mem_alloc(fs->allocator, PATH_MAX);
-    if (normalized == NULL)
+    if (normalized == null)
     {
         cl_fs_set_last_error(fs, "Failed to allocate memory for normalized path");
-        return NULL;
+        return null;
     }
 
     char *resolved = realpath(path, normalized);
-    if (resolved == NULL)
+    if (resolved == null)
     {
         // If realpath fails, we'll implement our own normalization
         char *p = normalized;
@@ -119,10 +119,10 @@ char *cl_fs_platform_denormalize_path(cl_fs_t *fs, const char *normalized_path)
     // For Apple, we'll just return a copy of the normalized path
     // as denormalization is not typically needed on Unix-like systems
     char *denormalized = cl_mem_alloc(fs->allocator, strlen(normalized_path) + 1);
-    if (denormalized == NULL)
+    if (denormalized == null)
     {
         cl_fs_set_last_error(fs, "Failed to allocate memory for denormalized path");
-        return NULL;
+        return null;
     }
     strcpy(denormalized, normalized_path);
     return denormalized;
@@ -240,9 +240,9 @@ static void list_all_files(const char *path)
     char full_path[1024];
 
 
-    if ((dir = opendir(path)) != NULL)
+    if ((dir = opendir(path)) != null)
     {
-        while ((ent = readdir(dir)) != NULL)
+        while ((ent = readdir(dir)) != null)
         {
             snprintf(full_path, sizeof(full_path), "%s/%s", path, ent->d_name);
             struct stat st;

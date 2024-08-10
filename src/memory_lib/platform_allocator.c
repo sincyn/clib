@@ -21,8 +21,8 @@
 static void *platform_alloc(u64 size, void *user_data)
 {
 #ifdef _WIN32
-    static HANDLE g_process_heap = NULL;
-    if (g_process_heap == NULL)
+    static HANDLE g_process_heap = null;
+    if (g_process_heap == null)
     {
         g_process_heap = GetProcessHeap();
     }
@@ -36,8 +36,8 @@ static void *platform_alloc(u64 size, void *user_data)
 static void *platform_realloc(void *ptr, u64 new_size, void *user_data)
 {
 #ifdef _WIN32
-    static HANDLE g_process_heap = NULL;
-    if (g_process_heap == NULL)
+    static HANDLE g_process_heap = null;
+    if (g_process_heap == null)
     {
         g_process_heap = GetProcessHeap();
     }
@@ -51,8 +51,8 @@ static void *platform_realloc(void *ptr, u64 new_size, void *user_data)
 static void platform_free(void *ptr, void *user_data)
 {
 #ifdef _WIN32
-    static HANDLE g_process_heap = NULL;
-    if (g_process_heap == NULL)
+    static HANDLE g_process_heap = null;
+    if (g_process_heap == null)
     {
         g_process_heap = GetProcessHeap();
     }

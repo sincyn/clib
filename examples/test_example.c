@@ -39,8 +39,8 @@ CL_TEST(test_string_length)
 
 CL_TEST(test_null_pointer)
 {
-    int *ptr = NULL;
-    CL_ASSERT_NULL(ptr);
+    int *ptr = null;
+    CL_ASSERT_null(ptr);
     int value = 5;
     CL_ASSERT_NOT_NULL(&value);
 }

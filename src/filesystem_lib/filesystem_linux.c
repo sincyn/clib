@@ -49,14 +49,14 @@ void cl_fs_platform_cleanup(cl_fs_t *fs)
 char *cl_fs_platform_normalize_path(cl_fs_t *fs, const char *path)
 {
     char *normalized = cl_mem_alloc(fs->allocator, PATH_MAX);
-    if (normalized == NULL)
+    if (normalized == null)
     {
         cl_fs_set_last_error(fs, "Failed to allocate memory for normalized path");
-        return NULL;
+        return null;
     }
 
     char *resolved = realpath(path, normalized);
-    if (resolved == NULL)
+    if (resolved == null)
     {
         // If realpath fails, we'll implement our own normalization
         char *p = normalized;
@@ -133,10 +133,10 @@ char *cl_fs_platform_denormalize_path(cl_fs_t *fs, const char *normalized_path)
     // For Linux, we'll just return a copy of the normalized path
     // as denormalization is not typically needed on Unix-like systems
     char *denormalized = cl_mem_alloc(fs->allocator, strlen(normalized_path) + 1);
-    if (denormalized == NULL)
+    if (denormalized == null)
     {
         cl_fs_set_last_error(fs, "Failed to allocate memory for denormalized path");
-        return NULL;
+        return null;
     }
     strcpy(denormalized, normalized_path);
     return denormalized;
@@ -167,15 +167,15 @@ cl_file_t *cl_fs_platform_open_file(cl_fs_t *fs, const char *path, cl_file_mode_
     if (fd == -1)
     {
         cl_fs_set_last_error(fs, strerror(errno));
-        return NULL;
+        return null;
     }
 
     cl_file_t *file = cl_mem_alloc(fs->allocator, sizeof(cl_file_t));
-    if (file == NULL)
+    if (file == null)
     {
         close(fd);
         cl_fs_set_last_error(fs, "Failed to allocate memory for file handle");
-        return NULL;
+        return null;
     }
 
     file->fs = fs;
@@ -391,30 +391,30 @@ bool cl_fs_platform_get_file_time(cl_fs_t *fs, const char *path, u64 *creation_t
 cl_fs_dir_iterator_t *cl_fs_platform_open_directory(cl_fs_t *fs, const char *path)
 {
     DIR *dir = opendir(path);
-    if (dir == NULL)
+    if (dir == null)
     {
         cl_fs_set_last_error(fs, strerror(errno));
-        return NULL;
+        return null;
     }
 
     cl_fs_dir_iterator_t *iterator = cl_mem_alloc(fs->allocator, sizeof(cl_fs_dir_iterator_t));
-    if (iterator == NULL)
+    if (iterator == null)
     {
         closedir(dir);
         cl_fs_set_last_error(fs, "Failed to allocate memory for directory iterator");
-        return NULL;
+        return null;
     }
 
     iterator->fs = fs;
     iterator->handle = dir;
 
     iterator->path = cl_mem_alloc(fs->allocator, strlen(path) + 1);
-    if (iterator->path == NULL)
+    if (iterator->path == null)
     {
         closedir(dir);
         cl_mem_free(fs->allocator, iterator);
         cl_fs_set_last_error(fs, "Failed to allocate memory for directory path");
-        return NULL;
+        return null;
     }
     strcpy(iterator->path, path);
 
@@ -425,7 +425,7 @@ bool cl_fs_platform_read_directory(cl_fs_dir_iterator_t *iterator, cl_fs_dir_ent
 {
     struct dirent *dir_entry;
     errno = 0;
-    if ((dir_entry = readdir((DIR *)iterator->handle)) == NULL)
+    if ((dir_entry = readdir((DIR *)iterator->handle)) == null)
     {
         if (errno != 0)
         {

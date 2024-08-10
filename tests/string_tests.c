@@ -82,7 +82,7 @@ CL_TEST(test_str_view_trim)
 CL_TEST(test_str_create)
 {
     cl_allocator_t *allocator =
-        cl_allocator_new(CL_ALLOCATOR_TYPE_PLATFORM, .flags = CL_ALLOCATOR_FLAG_NONE, .user_data = NULL);
+        cl_allocator_new(CL_ALLOCATOR_TYPE_PLATFORM, .flags = CL_ALLOCATOR_FLAG_NONE, .user_data = null);
     str s = str_create(allocator, "Hello, World!", 13);
     CL_ASSERT_EQUAL(s.len, 13);
     CL_ASSERT_EQUAL(strcmp(s.data, "Hello, World!"), 0);
@@ -93,7 +93,7 @@ CL_TEST(test_str_create)
 CL_TEST(test_str_lit)
 {
     cl_allocator_t *allocator =
-        cl_allocator_new(CL_ALLOCATOR_TYPE_PLATFORM, .flags = CL_ALLOCATOR_FLAG_NONE, .user_data = NULL);
+        cl_allocator_new(CL_ALLOCATOR_TYPE_PLATFORM, .flags = CL_ALLOCATOR_FLAG_NONE, .user_data = null);
     str s = str_lit(allocator, "Hello, World!");
     CL_ASSERT_EQUAL(s.len, 13);
     CL_ASSERT_EQUAL(strcmp(s.data, "Hello, World!"), 0);
@@ -104,7 +104,7 @@ CL_TEST(test_str_lit)
 CL_TEST(test_str_from_view)
 {
     cl_allocator_t *allocator =
-        cl_allocator_new(CL_ALLOCATOR_TYPE_PLATFORM, .flags = CL_ALLOCATOR_FLAG_NONE, .user_data = NULL);
+        cl_allocator_new(CL_ALLOCATOR_TYPE_PLATFORM, .flags = CL_ALLOCATOR_FLAG_NONE, .user_data = null);
     const str_view sv = str_view_lit("Hello, World!");
     str s = str_from_view(allocator, &sv);
     CL_ASSERT_EQUAL(s.len, 13);
@@ -116,7 +116,7 @@ CL_TEST(test_str_from_view)
 CL_TEST(test_str_concat)
 {
     cl_allocator_t *allocator =
-        cl_allocator_new(CL_ALLOCATOR_TYPE_PLATFORM, .flags = CL_ALLOCATOR_FLAG_NONE, .user_data = NULL);
+        cl_allocator_new(CL_ALLOCATOR_TYPE_PLATFORM, .flags = CL_ALLOCATOR_FLAG_NONE, .user_data = null);
     const str_view sv1 = str_view_lit("Hello, ");
     const str_view sv2 = str_view_lit("World!");
     str s = str_concat(allocator, &sv1, &sv2);
@@ -129,7 +129,7 @@ CL_TEST(test_str_concat)
 CL_TEST(test_str_split)
 {
     cl_allocator_t *allocator =
-        cl_allocator_new(CL_ALLOCATOR_TYPE_PLATFORM, .flags = CL_ALLOCATOR_FLAG_NONE, .user_data = NULL);
+        cl_allocator_new(CL_ALLOCATOR_TYPE_PLATFORM, .flags = CL_ALLOCATOR_FLAG_NONE, .user_data = null);
     const str_view sv = str_view_lit("Hello,World,Test");
     str *split = str_split(allocator, &sv, ',');
     CL_ASSERT_EQUAL(split[0].len, 5);
@@ -139,7 +139,7 @@ CL_TEST(test_str_split)
     CL_ASSERT_EQUAL(split[2].len, 4);
     CL_ASSERT_EQUAL(strcmp(split[2].data, "Test"), 0);
     CL_ASSERT_EQUAL(split[3].len, 0);
-    CL_ASSERT_NULL(split[3].data);
+    CL_ASSERT_null(split[3].data);
     for (int i = 0; i < 3; i++)
     {
         str_destroy(allocator, &split[i]);
@@ -151,7 +151,7 @@ CL_TEST(test_str_split)
 CL_TEST(test_str_join)
 {
     cl_allocator_t *allocator =
-        cl_allocator_new(CL_ALLOCATOR_TYPE_PLATFORM, .flags = CL_ALLOCATOR_FLAG_NONE, .user_data = NULL);
+        cl_allocator_new(CL_ALLOCATOR_TYPE_PLATFORM, .flags = CL_ALLOCATOR_FLAG_NONE, .user_data = null);
     const str_view strings[] = {str_view_lit("Hello"), str_view_lit("World"), str_view_lit("Test")};
     const str_view delimiter = str_view_lit(", ");
     str joined = str_join(allocator, strings, 3, &delimiter);
@@ -164,7 +164,7 @@ CL_TEST(test_str_join)
 CL_TEST(test_str_as_view)
 {
     cl_allocator_t *allocator =
-        cl_allocator_new(CL_ALLOCATOR_TYPE_PLATFORM, .flags = CL_ALLOCATOR_FLAG_NONE, .user_data = NULL);
+        cl_allocator_new(CL_ALLOCATOR_TYPE_PLATFORM, .flags = CL_ALLOCATOR_FLAG_NONE, .user_data = null);
     str s = str_lit(allocator, "Hello, World!");
     const str_view sv = str_as_view(&s);
     CL_ASSERT_EQUAL(sv.len, 13);
@@ -176,7 +176,7 @@ CL_TEST(test_str_as_view)
 CL_TEST(test_str_clear)
 {
     cl_allocator_t *allocator =
-        cl_allocator_new(CL_ALLOCATOR_TYPE_PLATFORM, .flags = CL_ALLOCATOR_FLAG_NONE, .user_data = NULL);
+        cl_allocator_new(CL_ALLOCATOR_TYPE_PLATFORM, .flags = CL_ALLOCATOR_FLAG_NONE, .user_data = null);
     str s = str_lit(allocator, "Hello, World!");
     str_clear(&s);
     CL_ASSERT_EQUAL(s.len, 0);

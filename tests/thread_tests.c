@@ -17,7 +17,7 @@ void *test_thread_func(void *arg)
     cl_mutex_lock(test_mutex);
     shared_value += *value;
     cl_mutex_unlock(test_mutex);
-    return NULL;
+    return null;
 }
 
 CL_TEST(test_thread_create_and_join)
@@ -26,7 +26,7 @@ CL_TEST(test_thread_create_and_join)
     cl_thread_t *thread = cl_thread_create(test_thread_func, &arg, CL_THREAD_FLAG_NONE);
     CL_ASSERT_NOT_NULL(thread);
 
-    cl_thread_join(thread, NULL);
+    cl_thread_join(thread, null);
     CL_ASSERT_EQUAL(shared_value, 5);
 
     cl_thread_destroy(thread);
@@ -41,8 +41,8 @@ CL_TEST(test_thread_mutex)
     cl_thread_t *thread1 = cl_thread_create(test_thread_func, &arg1, CL_THREAD_FLAG_NONE);
     cl_thread_t *thread2 = cl_thread_create(test_thread_func, &arg2, CL_THREAD_FLAG_NONE);
 
-    cl_thread_join(thread1, NULL);
-    cl_thread_join(thread2, NULL);
+    cl_thread_join(thread1, null);
+    cl_thread_join(thread2, null);
 
     CL_ASSERT_EQUAL(shared_value, 15);
 

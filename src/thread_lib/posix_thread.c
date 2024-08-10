@@ -58,7 +58,7 @@ void cl_thread_yield_platform(void) { sched_yield(); }
 
 void cl_thread_sleep_platform(uint32_t milliseconds) { usleep(milliseconds * 1000); }
 
-bool cl_mutex_init_platform(cl_mutex_t *mutex) { return pthread_mutex_init(&mutex->mutex, NULL) == 0; }
+bool cl_mutex_init_platform(cl_mutex_t *mutex) { return pthread_mutex_init(&mutex->mutex, null) == 0; }
 
 void cl_mutex_destroy_platform(cl_mutex_t *mutex) { pthread_mutex_destroy(&mutex->mutex); }
 
@@ -68,7 +68,7 @@ bool cl_mutex_trylock_platform(cl_mutex_t *mutex) { return pthread_mutex_trylock
 
 bool cl_mutex_unlock_platform(cl_mutex_t *mutex) { return pthread_mutex_unlock(&mutex->mutex) == 0; }
 
-bool cl_cond_init_platform(cl_cond_t *cond) { return pthread_cond_init(&cond->cond, NULL) == 0; }
+bool cl_cond_init_platform(cl_cond_t *cond) { return pthread_cond_init(&cond->cond, null) == 0; }
 
 void cl_cond_destroy_platform(cl_cond_t *cond) { pthread_cond_destroy(&cond->cond); }
 

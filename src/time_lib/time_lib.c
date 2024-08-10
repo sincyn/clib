@@ -16,7 +16,6 @@ bool cl_time_get_current(cl_time_t *time)
 {
     return cl_time_platform_get_current(time);
 }
-
 cl_time_t cl_time_diff(const cl_time_t *end, const cl_time_t *start)
 {
     cl_time_t diff;
