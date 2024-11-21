@@ -36,6 +36,8 @@ str str_join(const cl_allocator_t *allocator, const str_view *strings, u32 count
 str str_from_int(const cl_allocator_t *allocator, i64 value);
 str str_dup(const cl_allocator_t *allocator, const char *s);
 str str_ndup(const cl_allocator_t *allocator, const char *s, u32 length);
+bool str_push_char(const cl_allocator_t* allocator, str* s, char c);
+str str_with_capacity(const cl_allocator_t* allocator, u32 capacity);
 void str_clear(str *s);
 void str_destroy(const cl_allocator_t *allocator, str *s);
 

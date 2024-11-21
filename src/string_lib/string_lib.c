@@ -209,3 +209,30 @@ void str_destroy(const cl_allocator_t *allocator, str *s)
 
 // Conversion functions
 str_view str_as_view(const str *s) { return (str_view){s->len, s->data}; }
+
+bool str_push_char(const cl_allocator_t *allocator, str *s, const char c)
+{
+    // Reallocate if needed (+1 for null terminator)
+    char *new_data = cl_mem_realloc(allocator, s->data, s->len + 2);
+    if (!new_data)
+    {
+        return false;
+    }
+    s->data = new_data;
+    s->data[s->len] = c;
+    s->data[s->len + 1] = '\0';
+    s->len++;
+    return true;
+}
+
+str str_with_capacity(const cl_allocator_t *allocator, const u32 capacity)
+{
+    str s;
+    s.len = 0;
+    s.data = cl_mem_alloc(allocator, capacity + 1); // +1 for null terminator
+    if (s.data)
+    {
+        s.data[0] = '\0';
+    }
+    return s;
+}
